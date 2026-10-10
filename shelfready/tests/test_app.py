@@ -4,22 +4,22 @@ from pathlib import Path
 # the web page needs streamlit, which is only in the nomades_nppd_312 environment
 try:
     from streamlit.testing.v1 import AppTest
-    HAS_STREAMLIT: bool = True
+    Has_streamlit: bool = True
 except ImportError:
-    HAS_STREAMLIT = False
+    Has_streamlit = False
 
-APP_FILE: Path = Path(__file__).parent.parent.parent / "shelfready_app.py"
+App_file: Path = Path(__file__).parent.parent.parent / "shelfready_app.py"
 
 
-@unittest.skipUnless(HAS_STREAMLIT, "streamlit is not installed in this environment")
+@unittest.skipUnless(Has_streamlit, "streamlit is not installed in this environment")
 class AppTests(unittest.TestCase):
     def test_start_page_asks_for_a_file(self):
-        app = AppTest.from_file(str(APP_FILE)).run()
+        app = AppTest.from_file(str(App_file)).run()
         self.assertEqual(len(app.exception), 0)
         self.assertIn("Upload a CSV file", app.info[0].value)
 
     def test_sample_shop(self):
-        app = AppTest.from_file(str(APP_FILE)).run()
+        app = AppTest.from_file(str(App_file)).run()
         app.checkbox[0].check().run()
         self.assertEqual(len(app.exception), 0)
         self.assertEqual(app.metric[0].value, "85.5 / 100")

@@ -2,13 +2,13 @@
 
 from .models import Product, RuleResult
 from .questions import unanswered_questions
-from .rules import ALL_RULES
+from .rules import All_rules
 
-PASS_SCORE: int = 90 # minimum score to count as "likely to be recommended". example value, to be decided
+Pass_score: int = 90 # minimum score to count as "likely to be recommended". example value, to be decided
 
 # if one of these rules fails, the listing is not ready whatever its score
 # feed_standard: google merchant center would reject the listing (no title, no price, wrong availability...)
-BLOCKING_RULES: list[str] = ["feed_standard"]
+Blocking_rules: list[str] = ["feed_standard"]
 
 
 class ProductScore:
@@ -26,10 +26,10 @@ class ProductScore:
         # blocked = fails a rule that makes the feed reject the listing
         self.blocked: bool = False
         for result in self.failed:
-            if result.rule in BLOCKING_RULES:
+            if result.rule in Blocking_rules:
                 self.blocked = True
 
-        self.is_ready: bool = score >= PASS_SCORE and not self.blocked
+        self.is_ready: bool = score >= Pass_score and not self.blocked
 
     def to_dict(self) -> dict:
         # for the json download
@@ -52,7 +52,7 @@ class ProductScore:
 def score_product(product: Product) -> ProductScore:
     results: list[RuleResult] = []
     total: int = 0
-    for rule in ALL_RULES:
+    for rule in All_rules:
         result: RuleResult = rule(product)
         results.append(result)
         total = total + result.points

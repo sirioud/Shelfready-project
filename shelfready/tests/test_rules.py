@@ -21,7 +21,7 @@ class GtinTests(unittest.TestCase):
 class RuleTests(unittest.TestCase):
     def test_good_product_passes_every_rule(self):
         product = good_product()
-        for rule in rules.ALL_RULES:
+        for rule in rules.All_rules:
             self.assertTrue(rule(product).passed, rule.__name__)
 
     def test_each_rule_can_fail(self):
@@ -131,11 +131,11 @@ class RuleTests(unittest.TestCase):
                 self.assertTrue(rules.check_structured_share(product).passed)
 
     def test_points_add_up_to_100(self):
-        self.assertEqual(sum(rules.POINTS.values()), 100)
+        self.assertEqual(sum(rules.Points.values()), 100)
 
     def test_every_rule_has_points(self):
-        names = {r.__name__.replace("check_", "") for r in rules.ALL_RULES}
-        self.assertEqual(names, set(rules.POINTS))
+        names = {r.__name__.replace("check_", "") for r in rules.All_rules}
+        self.assertEqual(names, set(rules.Points))
 
 
 if __name__ == "__main__":

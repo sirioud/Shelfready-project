@@ -4,18 +4,18 @@ Unknown = the assistant can never show the listing for that question. Not part o
 
 from .attributes import parse_attributes, plain_name, to_number
 from .models import Product
-from .sector import SHOPPER_QUESTIONS
+from .sector import Shopper_questions
 
-YES: str = "yes"
-NO: str = "no"
-UNKNOWN: str = "unknown"
+Yes: str = "yes"
+No: str = "no"
+Unknown: str = "unknown"
 
 
 def questions_for(category: str) -> list[tuple]:
     # the questions for this category, empty list if the category has none
     key: str = category.strip().lower()
-    if key in SHOPPER_QUESTIONS:
-        return SHOPPER_QUESTIONS[key]
+    if key in Shopper_questions:
+        return Shopper_questions[key]
     return []
 
 
@@ -27,22 +27,22 @@ def answer_question(product: Product, question: tuple) -> str:
     found: dict[str, str] = parse_attributes(product.attributes)
 
     if attribute not in found:
-        return UNKNOWN
+        return Unknown
 
     if test == "equals":
         if found[attribute].lower() == str(wanted).lower():
-            return YES
-        return NO
+            return Yes
+        return No
 
     # "at_least" and "at_most" need a number
     number: float | None = to_number(found[attribute])
     if number is None:
-        return UNKNOWN
+        return Unknown
     if test == "at_least" and number >= wanted:
-        return YES
+        return Yes
     if test == "at_most" and number <= wanted:
-        return YES
-    return NO
+        return Yes
+    return No
 
 
 def unanswered_questions(product: Product) -> list[str]:
@@ -50,7 +50,7 @@ def unanswered_questions(product: Product) -> list[str]:
     # e.g. ["A sleeping bag for a night at -5 °C: needs the limit temperature in °C (limit_c)"]
     missing: list[str] = []
     for question in questions_for(product.category):
-        if answer_question(product, question) == UNKNOWN:
+        if answer_question(product, question) == Unknown:
             missing.append(f"{question[0]}: needs the {plain_name(question[1])}")
     return missing
 
@@ -58,7 +58,7 @@ def unanswered_questions(product: Product) -> list[str]:
 def question_summary(products: list[Product]) -> list[dict]:
     # one entry per question asked in this catalog, with the ids that match and the ids that cannot be matched
     summary: list[dict] = []
-    for category in SHOPPER_QUESTIONS:
+    for category in Shopper_questions:
         # only the products of this category
         in_category: list[Product] = []
         for product in products:
@@ -67,14 +67,14 @@ def question_summary(products: list[Product]) -> list[dict]:
         if len(in_category) == 0:
             continue # nobody in the catalog sells this category
 
-        for question in SHOPPER_QUESTIONS[category]:
+        for question in Shopper_questions[category]:
             matches: list[str] = []
             unknown: list[str] = []
             for product in in_category:
                 answer: str = answer_question(product, question)
-                if answer == YES:
+                if answer == Yes:
                     matches.append(product.id)
-                elif answer == UNKNOWN:
+                elif answer == Unknown:
                     unknown.append(product.id)
             summary.append({"question": question[0], "matches": matches, "unknown": unknown})
     return summary

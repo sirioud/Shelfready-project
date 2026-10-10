@@ -65,7 +65,7 @@ The two web page tests run only in an environment with Streamlit
 | Price / content coherence | Does the listing contradict itself or reality?             | `price_coherence`, `spec_agreement`, `plausible_values`         | 20     |
 | Structuring               | Is the information in fields or buried in prose?           | `structured_share`                                              | 10     |
 
-A listing counts as likely to be recommended from 90 points (`PASS_SCORE` in
+A listing counts as likely to be recommended from 90 points (`Pass_score` in
 `scoring.py`), unless it is **blocked**: a listing that fails `feed_standard`
 (no title, no price, wrong availability, placeholder brand) would be rejected
 by Google Merchant Center, so it is never ready, whatever its score. Point

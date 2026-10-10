@@ -4,14 +4,14 @@ from datetime import date
 from html import escape
 from pathlib import Path
 
-from .rules import POINTS
+from .rules import Points
 from .questions import question_summary, unanswered_questions
 from .scoring import ProductScore, count_ready, count_unanswered, most_common_problems
 
-CRITERIA: list[str] = ["Distinctive attributes", "Disambiguation", "Price / content coherence", "Structuring"]
+Criteria: list[str] = ["Distinctive attributes", "Disambiguation", "Price / content coherence", "Structuring"]
 
 # which criterion each rule belongs to
-CRITERION_OF_RULE: dict[str, str] = {
+Criterion_of_rule: dict[str, str] = {
     "expected_attributes": "Distinctive attributes",
     "attribute_count": "Distinctive attributes",
     "units": "Disambiguation",
@@ -26,7 +26,7 @@ CRITERION_OF_RULE: dict[str, str] = {
 }
 
 # each rule in plain words, for shop owners
-RULE_NAMES: dict[str, str] = {
+Rule_names: dict[str, str] = {
     "expected_attributes": "Key specs missing",
     "attribute_count": "Too few specs",
     "units": "Number without a unit",
@@ -41,7 +41,7 @@ RULE_NAMES: dict[str, str] = {
 }
 
 # what the shop owner can do about each problem
-HOW_TO_FIX: dict[str, str] = {
+How_to_fix: dict[str, str] = {
     "expected_attributes": "Add the missing specs to the attributes column, e.g. limit_c: -8 for a sleeping bag.",
     "attribute_count": "Give at least 3 specs in the attributes column (weight, size, material...).",
     "units": "Write the unit after every number: 75 kg, not 75.",
@@ -56,7 +56,7 @@ HOW_TO_FIX: dict[str, str] = {
 }
 
 # why each rule exists, shown in the html report
-BASIS_OF_RULE: dict[str, str] = {
+Basis_of_rule: dict[str, str] = {
     "expected_attributes": "Sector profile: ISO 23537 ratings for sleeping bags, feed apparel attributes for footwear",
     "attribute_count": "AI comparison relies on several filterable attributes",
     "units": "Numbers without units cannot be compared",
@@ -82,7 +82,7 @@ def terminal_report(scores: list[ProductScore], catalog_score: float, errors: li
     if len(problems) > 0:
         lines.append("Most common problems:")
         for rule, count in problems:
-            lines.append(f"  - {rule} ({CRITERION_OF_RULE[rule]}): {count} product(s)")
+            lines.append(f"  - {rule} ({Criterion_of_rule[rule]}): {count} product(s)")
         lines.append("")
 
     for product_score in scores:
@@ -111,18 +111,18 @@ def criterion_percentages(scores: list[ProductScore]) -> dict[str, int]:
     # points earned / points possible for each criterion, as a percentage
     earned: dict[str, int] = {}
     possible: dict[str, int] = {}
-    for name in CRITERIA:
+    for name in Criteria:
         earned[name] = 0
         possible[name] = 0
 
     for product_score in scores:
         for result in product_score.results:
-            name: str = CRITERION_OF_RULE[result.rule]
+            name: str = Criterion_of_rule[result.rule]
             earned[name] = earned[name] + result.points
-            possible[name] = possible[name] + POINTS[result.rule]
+            possible[name] = possible[name] + Points[result.rule]
 
     percentages: dict[str, int] = {}
-    for name in CRITERIA:
+    for name in Criteria:
         if possible[name] == 0:
             percentages[name] = 0
         else:
@@ -147,7 +147,7 @@ def level(score: float) -> str:
     return "poor"
 
 
-STYLE: str = """
+Style: str = """
 :root { --ink:#1d1f1e; --muted:#5f635f; --line:#e2e0d8; --bg:#f7f6f2; --card:#fff;
         --good:#1f7a5a; --medium:#b7791f; --poor:#b83232; }
 * { box-sizing: border-box; }
@@ -187,7 +187,7 @@ def html_report(scores: list[ProductScore], catalog_score: float, errors: list[s
     page.append('<html lang="en"><head><meta charset="utf-8">')
     page.append('<meta name="viewport" content="width=device-width, initial-scale=1">')
     page.append("<title>ShelfReady report</title>")
-    page.append(f"<style>{STYLE}</style></head><body><main>")
+    page.append(f"<style>{Style}</style></head><body><main>")
     page.append("<h1>ShelfReady report</h1>")
 
     # file name · sector · date, skipping the empty ones
@@ -206,7 +206,7 @@ def html_report(scores: list[ProductScore], catalog_score: float, errors: list[s
     # one card per criterion
     page.append("<h2>Score by criterion</h2>")
     page.append('<div class="grid">')
-    for name in CRITERIA:
+    for name in Criteria:
         value: int = percentages[name]
         page.append(
             f'<div class="card"><strong>{escape(name)}</strong>'
@@ -221,9 +221,9 @@ def html_report(scores: list[ProductScore], catalog_score: float, errors: list[s
         page.append('<div class="card"><ol class="fix" style="color:var(--ink)">')
         for rule, count in problems:
             page.append(
-                f"<li><strong>{escape(RULE_NAMES[rule])}</strong> ({escape(CRITERION_OF_RULE[rule])}): {count} product(s)<br>"
-                f"Fix: {escape(HOW_TO_FIX[rule])}<br>"
-                f'<span class="basis">{escape(BASIS_OF_RULE[rule])}</span></li>'
+                f"<li><strong>{escape(Rule_names[rule])}</strong> ({escape(Criterion_of_rule[rule])}): {count} product(s)<br>"
+                f"Fix: {escape(How_to_fix[rule])}<br>"
+                f'<span class="basis">{escape(Basis_of_rule[rule])}</span></li>'
             )
         page.append("</ol></div>")
 
@@ -253,7 +253,7 @@ def html_report(scores: list[ProductScore], catalog_score: float, errors: list[s
 
         fixes: str = ""
         for result in product_score.failed:
-            fixes = fixes + f"<li><strong>{escape(RULE_NAMES[result.rule])}</strong>: {escape(result.message)}</li>"
+            fixes = fixes + f"<li><strong>{escape(Rule_names[result.rule])}</strong>: {escape(result.message)}</li>"
         for question in unanswered_questions(product_score.product):
             fixes = fixes + f"<li>Cannot be matched to: {escape(question)}</li>"
         if fixes != "":

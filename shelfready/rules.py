@@ -3,32 +3,32 @@ Every rule takes one Product and gives back one RuleResult."""
 
 import re
 
-from .attributes import UNIT_OF_KEY, bare_numbers, parse_attributes, plain_name, specs_in_text, to_number
+from .attributes import Unit_of_key, bare_numbers, parse_attributes, plain_name, specs_in_text, to_number
 from .models import Product, RuleResult
 from .sector import (
-    AVAILABILITY_VALUES,
-    DECREASING_ATTRIBUTES,
-    DEFAULT_EXPECTED,
-    EXPECTED_ATTRIBUTES,
-    PLACEHOLDER_BRANDS,
-    PLAUSIBLE_RANGES,
+    Availability_values,
+    Decreasing_attributes,
+    Default_expected,
+    Expected_attributes,
+    Placeholder_brands,
+    Plausible_ranges,
 )
 
-MIN_ATTRIBUTES: int = 3 # a listing needs at least 3 attributes to be compared
-PREMIUM_PRICE: float = 100.0 # from this price, a short description looks suspicious
-MIN_PREMIUM_DESCRIPTION: int = 120 # characters
-MIN_STRUCTURED_SHARE: float = 0.5 # at least half the specs in the description must also be attributes
+Min_attributes: int = 3 # a listing needs at least 3 attributes to be compared
+Premium_price: float = 100.0 # from this price, a short description looks suspicious
+Min_premium_description: int = 120 # characters
+Min_structured_share: float = 0.5 # at least half the specs in the description must also be attributes
 
-PACK_PATTERN: re.Pattern = re.compile(r"\b(?:pack|set|box)\s+of\s+(\d+)\b", re.IGNORECASE)
+Pack_pattern: re.Pattern = re.compile(r"\b(?:pack|set|box)\s+of\s+(\d+)\b", re.IGNORECASE)
 # "compatible with ..." up to the full stop. "helmet-compatible hood" is a description, not a claim
-COMPATIBILITY_PATTERN: re.Pattern = re.compile(r"\bcompatible\s+with\b[^.]*", re.IGNORECASE)
+Compatibility_pattern: re.Pattern = re.compile(r"\bcompatible\s+with\b[^.]*", re.IGNORECASE)
 # a model name like "Primus 2", a size like "15 in", or a brand in capitals like "MSR"
-MODEL_PATTERN: re.Pattern = re.compile(r"\b(?:[A-Z][A-Za-z]+\s?\d|\d+\s?(?:in|mm|cm)|[A-Z]{2,})\b")
-CURRENCY_PATTERN: re.Pattern = re.compile(r"^[A-Z]{3}$") # EUR, CHF, USD
+Model_pattern: re.Pattern = re.compile(r"\b(?:[A-Z][A-Za-z]+\s?\d|\d+\s?(?:in|mm|cm)|[A-Z]{2,})\b")
+Currency_pattern: re.Pattern = re.compile(r"^[A-Z]{3}$") # EUR, CHF, USD
 
 # points per rule, total = 100
 # example values, to change once the scoring is decided
-POINTS: dict[str, int] = {
+Points: dict[str, int] = {
     "expected_attributes": 20,
     "attribute_count": 5,
     "units": 12,
@@ -46,16 +46,16 @@ POINTS: dict[str, int] = {
 def make_result(rule: str, passed: bool, message: str) -> RuleResult:
     # full points if the rule passed, 0 otherwise. the message is only kept when it failed
     if passed:
-        return RuleResult(rule, True, POINTS[rule], "")
+        return RuleResult(rule, True, Points[rule], "")
     return RuleResult(rule, False, 0, message)
 
 
 def expected_for(category: str) -> list[str]:
     # the attributes this category must have
     key: str = category.strip().lower()
-    if key in EXPECTED_ATTRIBUTES:
-        return EXPECTED_ATTRIBUTES[key]
-    return DEFAULT_EXPECTED
+    if key in Expected_attributes:
+        return Expected_attributes[key]
+    return Default_expected
 
 
 # criterion 1: distinctive attributes
@@ -73,8 +73,8 @@ def check_expected_attributes(product: Product) -> RuleResult:
 
 def check_attribute_count(product: Product) -> RuleResult:
     found: dict[str, str] = parse_attributes(product.attributes)
-    passed: bool = len(found) >= MIN_ATTRIBUTES
-    return make_result("attribute_count", passed, f"Fewer than {MIN_ATTRIBUTES} structured attributes")
+    passed: bool = len(found) >= Min_attributes
+    return make_result("attribute_count", passed, f"Fewer than {Min_attributes} structured attributes")
 
 
 # criterion 2: disambiguation
@@ -89,10 +89,10 @@ def check_units(product: Product) -> RuleResult:
 def check_compatibility(product: Product) -> RuleResult:
     # "compatible with most cartridges" is vague, "compatible with Primus 2" is not
     text: str = product.title + " " + product.description
-    claims: list[str] = COMPATIBILITY_PATTERN.findall(text)
+    claims: list[str] = Compatibility_pattern.findall(text)
     vague: list[str] = []
     for claim in claims:
-        if MODEL_PATTERN.search(claim) is None:
+        if Model_pattern.search(claim) is None:
             vague.append(claim)
     passed: bool = len(vague) == 0
     return make_result("compatibility", passed, "Compatibility claim without a precise list of models")
@@ -101,7 +101,7 @@ def check_compatibility(product: Product) -> RuleResult:
 def check_quantity(product: Product) -> RuleResult:
     # "pack of 2" in the text needs a pack_size attribute
     text: str = product.title + " " + product.description
-    match: re.Match | None = PACK_PATTERN.search(text)
+    match: re.Match | None = Pack_pattern.search(text)
     found: dict[str, str] = parse_attributes(product.attributes)
     passed: bool = match is None or "pack_size" in found
     return make_result("quantity", passed, "Pack mentioned but the " + plain_name("pack_size") + " is missing")
@@ -151,14 +151,14 @@ def check_feed_standard(product: Product) -> RuleResult:
         problems.append("price is missing")
 
     availability: str = product.availability.strip().lower().replace(" ", "_") # "in stock" -> "in_stock"
-    if availability not in AVAILABILITY_VALUES:
+    if availability not in Availability_values:
         problems.append(f"availability '{product.availability}' is not an accepted value")
 
-    if CURRENCY_PATTERN.match(product.currency) is None:
+    if Currency_pattern.match(product.currency) is None:
         problems.append("currency is not a three-letter code")
 
     brand: str = product.brand.strip().lower()
-    if brand == "" or brand in PLACEHOLDER_BRANDS:
+    if brand == "" or brand in Placeholder_brands:
         problems.append("brand is empty or a placeholder")
 
     passed: bool = len(problems) == 0
@@ -169,10 +169,10 @@ def check_feed_standard(product: Product) -> RuleResult:
 
 def check_price_coherence(product: Product) -> RuleResult:
     # an expensive product with a very short description is not credible
-    if product.price is None or product.price < PREMIUM_PRICE:
+    if product.price is None or product.price < Premium_price:
         return make_result("price_coherence", True, "")
-    passed: bool = len(product.description) >= MIN_PREMIUM_DESCRIPTION
-    return make_result("price_coherence", passed, f"Premium price but description shorter than {MIN_PREMIUM_DESCRIPTION} characters")
+    passed: bool = len(product.description) >= Min_premium_description
+    return make_result("price_coherence", passed, f"Premium price but description shorter than {Min_premium_description} characters")
 
 
 def check_spec_agreement(product: Product) -> RuleResult:
@@ -183,8 +183,8 @@ def check_spec_agreement(product: Product) -> RuleResult:
         # attributes of this listing that use the same unit
         # a sleeping bag has three in °C (comfort, limit, extreme), so the title only has to agree with one
         same_unit: list[str] = []
-        for key in UNIT_OF_KEY:
-            if UNIT_OF_KEY[key] == unit and key in found:
+        for key in Unit_of_key:
+            if Unit_of_key[key] == unit and key in found:
                 same_unit.append(key)
         if len(same_unit) == 0:
             continue # no attribute to compare with
@@ -218,20 +218,20 @@ def check_plausible_values(product: Product) -> RuleResult:
     problems: list[str] = []
 
     # 1. each number inside its usual range
-    for key in PLAUSIBLE_RANGES:
+    for key in Plausible_ranges:
         if key not in found:
             continue
         number: float | None = to_number(found[key])
         if number is None:
             problems.append(f"{plain_name(key)} should be a number, not '{found[key]}'")
             continue
-        lowest: int = PLAUSIBLE_RANGES[key][0]
-        highest: int = PLAUSIBLE_RANGES[key][1]
+        lowest: int = Plausible_ranges[key][0]
+        highest: int = Plausible_ranges[key][1]
         if number < lowest or number > highest:
             problems.append(f"{plain_name(key)} is {found[key]}, outside the usual range ({lowest} to {highest})")
 
     # 2. temperatures that must go down: comfort > limit > extreme
-    for group in DECREASING_ATTRIBUTES:
+    for group in Decreasing_attributes:
         previous_key: str = ""
         previous_number: float | None = None
         for key in group:
@@ -279,12 +279,12 @@ def structured_share(product: Product) -> float:
 
 def check_structured_share(product: Product) -> RuleResult:
     share: float = structured_share(product)
-    passed: bool = share >= MIN_STRUCTURED_SHARE
+    passed: bool = share >= Min_structured_share
     return make_result("structured_share", passed, "Specifications live in the description instead of structured attributes")
 
 
 # all rules, in the order they run. to add a rule: write it, add it here and in POINTS
-ALL_RULES: list = [
+All_rules: list = [
     check_expected_attributes,
     check_attribute_count,
     check_units,

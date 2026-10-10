@@ -2,25 +2,25 @@
 
 import re
 
-from .sector import ATTRIBUTE_LABELS
+from .sector import Attribute_labels
 
 # attributes are written like this: "volume_l: 30 | material: nylon"
-PAIR_SEPARATOR: str = "|"
-KEY_VALUE_SEPARATOR: str = ":"
+Pair_separator: str = "|"
+Key_value_separator: str = ":"
 
 # a number followed by a unit: 30 l, 900 g, 750 ml, 400 lm, 20 h, 3 min, -8 °C
 # the minus sign is only kept when it is not stuck to a word, so "2-person" stays positive
-NUMBER_WITH_UNIT: re.Pattern = re.compile(
+Number_with_unit: re.Pattern = re.compile(
     r"((?:(?<![\w-])[-−])?\d+(?:[.,]\d+)?)\s*(°\s?c|minutes|min|ml|lm|l|g|kg|cm|mm|in|h|w|wh)(?![\w])", re.IGNORECASE
 )
 # a number on its own, not stuck to a letter (p001) or part of a decimal (12.5)
 # a full stop after it is fine: "aged 6 to 10." still finds 10
-BARE_NUMBER: re.Pattern = re.compile(r"(?<![\w.,])\d+(?:[.,]\d+)?(?!\w|[.,]\d)")
+Bare_number: re.Pattern = re.compile(r"(?<![\w.,])\d+(?:[.,]\d+)?(?!\w|[.,]\d)")
 # "pack of 4", "set of 6", "box of 2"
-QUANTITY_PHRASE: re.Pattern = re.compile(r"\b(?:pack|set|box)\s+of\s+(\d+)\b", re.IGNORECASE)
+Quantity_phrase: re.Pattern = re.compile(r"\b(?:pack|set|box)\s+of\s+(\d+)\b", re.IGNORECASE)
 
 # which unit belongs to which attribute key
-UNIT_OF_KEY: dict[str, str] = {
+Unit_of_key: dict[str, str] = {
     "capacity_ml": "ml",
     "volume_l": "l",
     "weight_g": "g",
@@ -42,12 +42,12 @@ def parse_attributes(raw: str | None) -> dict[str, str]:
     if raw is None:
         return pairs
 
-    chunks: list[str] = raw.split(PAIR_SEPARATOR)
+    chunks: list[str] = raw.split(Pair_separator)
     for chunk in chunks:
-        if KEY_VALUE_SEPARATOR not in chunk:
+        if Key_value_separator not in chunk:
             continue # no colon, not a key: value pair
 
-        parts: list[str] = chunk.split(KEY_VALUE_SEPARATOR, 1) # split on the first colon only
+        parts: list[str] = chunk.split(Key_value_separator, 1) # split on the first colon only
         key: str = parts[0].strip().lower()
         value: str = parts[1].strip()
         if key != "" and value != "":
@@ -61,7 +61,7 @@ def specs_in_text(text: str | None) -> list[tuple[str, str]]:
     if text is None:
         return found
 
-    matches: list[tuple[str, str]] = NUMBER_WITH_UNIT.findall(text)
+    matches: list[tuple[str, str]] = Number_with_unit.findall(text)
     for match in matches:
         value: str = match[0].replace(",", ".").replace("−", "-") # "−" is the typographic minus sign
         unit: str = match[1].lower()
@@ -78,15 +78,15 @@ def bare_numbers(text: str | None) -> list[str]:
 
     # positions of numbers that are fine because a unit or "pack of" explains them
     covered: list[int] = []
-    for match in NUMBER_WITH_UNIT.finditer(text):
+    for match in Number_with_unit.finditer(text):
         start: int = match.start(1)
         if text[start] == "-" or text[start] == "−":
             start = start + 1 # the number itself starts after the minus sign
         covered.append(start)
-    for match in QUANTITY_PHRASE.finditer(text):
+    for match in Quantity_phrase.finditer(text):
         covered.append(match.start(1))
 
-    for match in BARE_NUMBER.finditer(text):
+    for match in Bare_number.finditer(text):
         if match.start() in covered:
             continue
 
@@ -99,13 +99,13 @@ def bare_numbers(text: str | None) -> list[str]:
 
 
 # a number at the very start of a text: "30", "-8", "1.5"
-LEADING_NUMBER: re.Pattern = re.compile(r"-?\d+(?:\.\d+)?")
+Leading_number: re.Pattern = re.compile(r"-?\d+(?:\.\d+)?")
 
 
 def to_number(value: str) -> float | None:
     # "1100" -> 1100.0, "-2" -> -2.0, "1,5" -> 1.5, "30 l" -> 30.0, "30l" -> 30.0, "light" -> None
     text: str = value.strip().replace(",", ".").replace("−", "-")
-    match: re.Match | None = LEADING_NUMBER.match(text)
+    match: re.Match | None = Leading_number.match(text)
     if match is None:
         return None
     return float(match.group())
@@ -113,6 +113,6 @@ def to_number(value: str) -> float | None:
 
 def plain_name(key: str) -> str:
     # "limit_c" -> "limit temperature in °C (limit_c)", the key stays so the owner knows what to type
-    if key in ATTRIBUTE_LABELS:
-        return f"{ATTRIBUTE_LABELS[key]} ({key})"
+    if key in Attribute_labels:
+        return f"{Attribute_labels[key]} ({key})"
     return key

@@ -6,14 +6,14 @@ from pathlib import Path
 
 from shelfready.__main__ import main
 
-SAMPLE = Path(__file__).parent.parent / "data" / "sample_products.csv"
+Sample = Path(__file__).parent.parent / "data" / "sample_products.csv"
 
 
 class CliTests(unittest.TestCase):
     def test_audit_sample_file(self):
         output = io.StringIO()
         with redirect_stdout(output):
-            code = main(["audit", str(SAMPLE)])
+            code = main(["audit", str(Sample)])
         self.assertEqual(code, 0)
         self.assertIn("AI readability score: 85.5 / 100", output.getvalue())
         self.assertIn("Products likely to be recommended: 4 of 10", output.getvalue())
@@ -23,7 +23,7 @@ class CliTests(unittest.TestCase):
             target = Path(tmp) / "reports" / "report.html"
             output = io.StringIO()
             with redirect_stdout(output):
-                code = main(["audit", str(SAMPLE), "--html", str(target)])
+                code = main(["audit", str(Sample), "--html", str(target)])
             self.assertEqual(code, 0)
             self.assertTrue(target.exists())
             self.assertIn("ShelfReady report", target.read_text(encoding="utf-8"))
@@ -39,7 +39,7 @@ class CliTests(unittest.TestCase):
     def test_folder_gives_clean_error(self):
         errors = io.StringIO()
         with redirect_stderr(errors):
-            code = main(["audit", str(SAMPLE.parent)])
+            code = main(["audit", str(Sample.parent)])
         self.assertEqual(code, 1)
         self.assertIn("Not a file", errors.getvalue())
 

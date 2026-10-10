@@ -53,11 +53,11 @@ class HtmlReportTests(unittest.TestCase):
         self.assertNotIn("<strong>gtin</strong>", page)
 
     def test_every_rule_has_a_name_and_a_fix(self):
-        from shelfready.report import HOW_TO_FIX, RULE_NAMES
-        from shelfready.rules import POINTS
-        for rule in POINTS:
-            self.assertIn(rule, RULE_NAMES)
-            self.assertIn(rule, HOW_TO_FIX)
+        from shelfready.report import How_to_fix, Rule_names
+        from shelfready.rules import Points
+        for rule in Points:
+            self.assertIn(rule, Rule_names)
+            self.assertIn(rule, How_to_fix)
 
     def test_write_creates_folder_and_file(self):
         with tempfile.TemporaryDirectory() as tmp:

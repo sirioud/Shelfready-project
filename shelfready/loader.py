@@ -9,7 +9,7 @@ from pathlib import Path
 from .models import Product
 
 # columns the file must have, otherwise we cannot do anything
-REQUIRED_COLUMNS: set[str] = {"id", "title", "price"}
+Required_columns: set[str] = {"id", "title", "price"}
 
 
 class LoaderError(Exception):
@@ -87,7 +87,7 @@ def load_products_from_text(text: str) -> tuple[list[Product], list[str]]:
     if reader.fieldnames is not None:
         header = list(reader.fieldnames)
     missing: list[str] = []
-    for column in REQUIRED_COLUMNS:
+    for column in Required_columns:
         if column not in header:
             missing.append(column)
     if len(missing) > 0:

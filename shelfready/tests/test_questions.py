@@ -1,10 +1,10 @@
 import unittest
 
-from shelfready.questions import NO, UNKNOWN, YES, answer_question, question_summary, unanswered_questions
+from shelfready.questions import No, Unknown, Yes, answer_question, question_summary, unanswered_questions
 from shelfready.tests.helpers import good_product
 
 # question = (text, attribute, test, wanted value), as in sector.py
-COLD_NIGHT: tuple = ("A sleeping bag for a night at -5 °C", "limit_c", "at_most", -5)
+Cold_night: tuple = ("A sleeping bag for a night at -5 °C", "limit_c", "at_most", -5)
 
 
 class QuestionTests(unittest.TestCase):
@@ -12,13 +12,13 @@ class QuestionTests(unittest.TestCase):
         warm_bag = good_product(category="sleeping_bag", attributes="comfort_c: -2 | limit_c: -8 | extreme_c: -24")
         summer_bag = good_product(category="sleeping_bag", attributes="comfort_c: 10 | limit_c: 5 | extreme_c: -5")
         comfort_only = good_product(category="sleeping_bag", attributes="comfort_c: 0 | weight_g: 1100")
-        self.assertEqual(answer_question(warm_bag, COLD_NIGHT), YES)
-        self.assertEqual(answer_question(summer_bag, COLD_NIGHT), NO)
-        self.assertEqual(answer_question(comfort_only, COLD_NIGHT), UNKNOWN)
+        self.assertEqual(answer_question(warm_bag, Cold_night), Yes)
+        self.assertEqual(answer_question(summer_bag, Cold_night), No)
+        self.assertEqual(answer_question(comfort_only, Cold_night), Unknown)
 
     def test_equals_ignores_case(self):
         shoes = good_product(category="shoes", attributes="size: 42 | gender: Unisex")
-        self.assertEqual(answer_question(shoes, ("Unisex shoes", "gender", "equals", "unisex")), YES)
+        self.assertEqual(answer_question(shoes, ("Unisex shoes", "gender", "equals", "unisex")), Yes)
 
     def test_unanswered_questions(self):
         comfort_only = good_product(category="sleeping_bag", attributes="comfort_c: 0 | weight_g: 1100")

@@ -1,7 +1,7 @@
 import unittest
 
 from shelfready.attributes import bare_numbers, parse_attributes, plain_name, specs_in_text, to_number
-from shelfready.sector import ATTRIBUTE_LABELS, EXPECTED_ATTRIBUTES, SHOPPER_QUESTIONS
+from shelfready.sector import Attribute_labels, Expected_attributes, Shopper_questions
 
 
 class AttributeTests(unittest.TestCase):
@@ -55,12 +55,12 @@ class AttributeTests(unittest.TestCase):
 
     def test_every_needed_attribute_has_a_label(self):
         # the reports must never show a bare key for an attribute the tool asks for
-        for category in EXPECTED_ATTRIBUTES:
-            for key in EXPECTED_ATTRIBUTES[category]:
-                self.assertIn(key, ATTRIBUTE_LABELS)
-        for category in SHOPPER_QUESTIONS:
-            for question in SHOPPER_QUESTIONS[category]:
-                self.assertIn(question[1], ATTRIBUTE_LABELS)
+        for category in Expected_attributes:
+            for key in Expected_attributes[category]:
+                self.assertIn(key, Attribute_labels)
+        for category in Shopper_questions:
+            for question in Shopper_questions[category]:
+                self.assertIn(question[1], Attribute_labels)
 
 
 if __name__ == "__main__":
