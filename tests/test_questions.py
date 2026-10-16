@@ -1,7 +1,7 @@
 import unittest
 
 from shelfready.questions import No, Unknown, Yes, answer_question, question_summary, unanswered_questions
-from shelfready.tests.helpers import good_product
+from tests.helpers import good_product
 
 # question = (text, attribute, test, wanted value), as in sector.py
 Cold_night: tuple = ("A sleeping bag for a night at -5 °C", "limit_c", "at_most", -5)

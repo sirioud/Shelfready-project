@@ -2,7 +2,7 @@ import unittest
 
 from shelfready.feed import highlights_of, questions_and_answers, short_label, supplemental_feed, with_unit
 from shelfready.models import Product
-from shelfready.tests.helpers import good_product
+from tests.helpers import good_product
 
 
 class FeedTests(unittest.TestCase):

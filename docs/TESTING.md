@@ -13,8 +13,8 @@ Run every command from the root of the repository (the folder that contains
 conda activate nomades_nppd_312                  # environment with Streamlit
 python -m unittest                               # all tests
 python -m unittest -v                            # one line per test, with its name
-python -m unittest shelfready.tests.test_scoring # one file only
-python -m unittest shelfready.tests.test_scoring.ScoringTests.test_catalog_average  # one test only
+python -m unittest tests.test_scoring # one file only
+python -m unittest tests.test_scoring.ScoringTests.test_catalog_average  # one test only
 ```
 
 In VS Code, the tests also appear in the **Testing** panel (flask icon in the
@@ -42,13 +42,13 @@ test with the expected value and the value it actually got.
 
 ## How a test is written
 
-Example from `shelfready/tests/test_scoring.py`:
+Example from `tests/test_scoring.py`:
 
 ```python
 import unittest
 
 from shelfready.scoring import score_product
-from shelfready.tests.helpers import good_product
+from tests.helpers import good_product
 
 
 class ScoringTests(unittest.TestCase):
@@ -74,7 +74,7 @@ class ScoringTests(unittest.TestCase):
 
 ## The helper: `good_product()`
 
-`shelfready/tests/helpers.py` builds a **perfect listing** that passes every
+`tests/helpers.py` builds a **perfect listing** that passes every
 rule. A test gives keyword arguments to break only the field it wants to check:
 
 ```python
@@ -89,7 +89,7 @@ exactly one cause.
 
 ## What is tested
 
-The tests are in `shelfready/tests/`. There is one test file per module.
+The tests are in `tests/`. There is one test file per module.
 
 | File | Tests | Module tested | What it checks |
 |---|---|---|---|

@@ -37,10 +37,16 @@ against that sector's standards rather than applying generic rules.
 ## Project structure
 
 ```
-Shelfready-project/
+nomades_project/
 ├── shelfready_app.py        the Streamlit web page (display only)
+├── requirements.txt         packages to install (Streamlit)
 ├── README.md
-├── TESTING.md               how the tests work
+├── docs/
+│   ├── TESTING.md           how the tests work
+│   ├── CODE_NOTES.md        notes on the code and review changes
+│   ├── real_world_csv_reference.md
+│   └── sample_data_chart.md what is in the sample CSV
+├── tests/                   94 unittest tests, one file per module
 └── shelfready/              the package: all the checking logic
     ├── __main__.py          command line (python -m shelfready)
     ├── loader.py            reads and validates the CSV
@@ -52,8 +58,7 @@ Shelfready-project/
     ├── feed.py              the AI-ready feed for Google Merchant Center
     ├── sector.py            all the outdoor-gear knowledge, as data
     ├── report.py            terminal, HTML and JSON reports
-    ├── data/                sample_products.csv, test_shop.csv
-    └── tests/               94 unittest tests
+    └── data/                sample_products.csv, test_shop.csv
 ```
 
 ## Web page
@@ -65,6 +70,8 @@ The web page needs Streamlit, which is installed in the course environment
 conda activate nomades_nppd_312
 streamlit run shelfready_app.py
 ```
+
+Outside the course container, install it with `pip install -r requirements.txt`.
 
 Open the address it prints (usually http://localhost:8501). When running in
 the container, VS Code forwards the port automatically.
@@ -122,7 +129,7 @@ python -m unittest
 ```
 
 94 tests. The two web page tests run only in an environment with Streamlit
-(`nomades_nppd_312`); elsewhere they are skipped. See [TESTING.md](TESTING.md)
+(`nomades_nppd_312`); elsewhere they are skipped. See [TESTING.md](docs/TESTING.md)
 for how the tests work and how to add one.
 
 ## Code style

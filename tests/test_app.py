@@ -8,7 +8,7 @@ try:
 except ImportError:
     Has_streamlit = False
 
-App_file: Path = Path(__file__).parent.parent.parent / "shelfready_app.py"
+App_file: Path = Path(__file__).parent.parent / "shelfready_app.py"
 
 
 @unittest.skipUnless(Has_streamlit, "streamlit is not installed in this environment")

@@ -2,7 +2,7 @@ import unittest
 
 from shelfready import rules
 from shelfready.models import Product, RuleResult
-from shelfready.tests.helpers import good_product
+from tests.helpers import good_product
 
 
 class GtinTests(unittest.TestCase):

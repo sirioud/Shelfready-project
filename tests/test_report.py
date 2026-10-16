@@ -4,7 +4,7 @@ from pathlib import Path
 
 from shelfready.report import criterion_percentages, html_report, json_report, write_html_report
 from shelfready.scoring import score_catalog
-from shelfready.tests.helpers import good_product
+from tests.helpers import good_product
 
 
 class HtmlReportTests(unittest.TestCase):

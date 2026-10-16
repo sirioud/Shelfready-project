@@ -6,7 +6,7 @@ from pathlib import Path
 
 from shelfready.__main__ import main
 
-Sample = Path(__file__).parent.parent / "data" / "sample_products.csv"
+Sample = Path(__file__).parent.parent / "shelfready" / "data" / "sample_products.csv"
 
 
 class CliTests(unittest.TestCase):

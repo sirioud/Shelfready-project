@@ -1,15 +1,3 @@
 __pycache__/
 .venv/
 shelfready/reports/
-
-# container home dotfiles
-.bash_history
-.bash_logout
-.bashrc
-.gitconfig
-.lesshst
-.profile
-.python_history
-.setup_done
-.viminfo
-.vimrc

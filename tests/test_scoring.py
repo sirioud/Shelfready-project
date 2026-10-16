@@ -1,7 +1,7 @@
 import unittest
 
 from shelfready.scoring import count_ready, count_unanswered, most_common_problems, score_catalog, score_product
-from shelfready.tests.helpers import good_product
+from tests.helpers import good_product
 
 
 class ScoringTests(unittest.TestCase):
