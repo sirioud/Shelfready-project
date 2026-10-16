@@ -5,4 +5,3 @@ __pycache__
 docs
 tests
 *.md
-requirements-freeze.txt

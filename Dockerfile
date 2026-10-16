@@ -3,8 +3,12 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# Which requirements file to install: requirements.txt (default, used by Render)
+# or requirements-freeze.txt (full course env): docker build --build-arg REQUIREMENTS=requirements-freeze.txt .
+ARG REQUIREMENTS=requirements.txt
+
 # Install the requirements first, so Docker can reuse this layer when only the code changes
-COPY requirements.txt ./
+COPY ${REQUIREMENTS} ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the app and its package (code + sample data)
