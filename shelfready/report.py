@@ -4,26 +4,12 @@ from datetime import date
 from html import escape
 from pathlib import Path
 
-from .rules import Points
+from .rules import Points, Criterion_of_rule
 from .questions import question_summary, unanswered_questions
 from .scoring import ProductScore, count_ready, count_unanswered, most_common_problems
 
-Criteria: list[str] = ["Distinctive attributes", "Disambiguation", "Price / content coherence", "Structuring"]
-
-# which criterion each rule belongs to
-Criterion_of_rule: dict[str, str] = {
-    "expected_attributes": "Distinctive attributes",
-    "attribute_count": "Distinctive attributes",
-    "units": "Disambiguation",
-    "compatibility": "Disambiguation",
-    "quantity": "Disambiguation",
-    "gtin": "Disambiguation",
-    "feed_standard": "Disambiguation",
-    "price_coherence": "Price / content coherence",
-    "spec_agreement": "Price / content coherence",
-    "plausible_values": "Price / content coherence",
-    "structured_share": "Structuring",
-}
+# the five criteria, in display order. each rule is mapped to one of these in rules.Rule_registry
+Criteria: list[str] = ["Distinctive attributes", "Disambiguation", "Price / content coherence", "Structuring", "Clear wording"]
 
 # each rule in plain words, for shop owners
 Rule_names: dict[str, str] = {
@@ -35,9 +21,12 @@ Rule_names: dict[str, str] = {
     "gtin": "Barcode missing or wrong",
     "feed_standard": "Rejected by Google Shopping",
     "price_coherence": "Description too short for the price",
-    "spec_agreement": "Title and specs disagree",
+    "spec_agreement": "Text and specs disagree",
     "plausible_values": "Value that looks wrong",
     "structured_share": "Specs hidden in the text",
+    "facts_not_claims": "Marketing words instead of facts",
+    "keyword_stuffing": "Keyword stuffing in the title",
+    "clear_opening": "Unclear first sentence",
 }
 
 # what the shop owner can do about each problem
@@ -50,9 +39,12 @@ How_to_fix: dict[str, str] = {
     "gtin": "Copy the barcode from the box. The last digit is a check digit, so one typo makes it invalid.",
     "feed_standard": "Fill in the title and price, use in_stock / out_of_stock / preorder / backorder, and give a real brand.",
     "price_coherence": "Write a longer description: an expensive product needs at least 120 characters.",
-    "spec_agreement": "Make the title and the attributes say the same number.",
+    "spec_agreement": "Make the title, the description and the attributes say the same number.",
     "plausible_values": "Check the value and its unit: weight_g is in grams, temperatures go comfort > limit > extreme.",
     "structured_share": "Copy the numbers from the description into the attributes column, e.g. lumens_lm: 400.",
+    "facts_not_claims": "Replace each claim with a number: 'ultra-light' becomes 'weighs 780 g'.",
+    "keyword_stuffing": "Write the title as a name, each word once: brand, product type, key spec.",
+    "clear_opening": "Start the description with what the product is and what it is for: 'Hiking daypack for day trips...'.",
 }
 
 # why each rule exists, shown in the html report
@@ -68,6 +60,9 @@ Basis_of_rule: dict[str, str] = {
     "spec_agreement": "Consistent product details",
     "plausible_values": "Sector value ranges; EN ISO 23537 order comfort > limit > extreme",
     "structured_share": "Facts in dedicated fields, as in Product structured data",
+    "facts_not_claims": "GEO (Aggarwal et al., KDD 2024): statistics raise visibility in AI answers, an authoritative tone does not",
+    "keyword_stuffing": "GEO (Aggarwal et al., KDD 2024): keyword stuffing lowers visibility in AI answers; Merchant Center titles stop at 150 characters",
+    "clear_opening": "GEO guidance for shops: the first sentence says what the product is and who it is for",
 }
 
 
@@ -138,11 +133,18 @@ def products_of(scores: list[ProductScore]) -> list:
     return products
 
 
+# score grading, shared by the html report and the web verdict box so a score
+# gets the same colour in both. separate from scoring.Pass_score, which is the
+# stricter per-listing cutoff for counting a single listing as "ready".
+Good_score: int = 80
+Medium_score: int = 60
+
+
 def level(score: float) -> str:
-    # used as a css class to colour the scores
-    if score >= 80:
+    # used as a css class to colour the scores: good (green), medium (orange), poor (red)
+    if score >= Good_score:
         return "good"
-    if score >= 60:
+    if score >= Medium_score:
         return "medium"
     return "poor"
 

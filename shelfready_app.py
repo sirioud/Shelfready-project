@@ -1,4 +1,4 @@
-"""ShelfReady web page. Run from the python/ folder:
+"""ShelfReady web page. Run from the root of the repository:
     conda activate nomades_nppd_312
     streamlit run shelfready_app.py
 The checks are the same as the command line, this file only shows the results."""
@@ -8,6 +8,7 @@ from pathlib import Path
 
 import streamlit as st
 
+from shelfready.feed import supplemental_feed
 from shelfready.loader import LoaderError, decode_bytes, load_products_from_text
 from shelfready.models import Product
 from shelfready.questions import question_summary, unanswered_questions
@@ -19,11 +20,29 @@ from shelfready.report import (
     criterion_percentages,
     html_report,
     json_report,
+    level,
 )
 from shelfready.scoring import Pass_score, ProductScore, count_ready, count_unanswered, most_common_problems, score_catalog
 from shelfready.sector import Expected_attributes, Sector
 
 Sample_file: Path = Path(__file__).parent / "shelfready" / "data" / "sample_products.csv"
+
+
+class AuditResult:
+    # everything one audit produces, bundled so it travels as a single value
+    def __init__(
+        self,
+        products: list[Product],
+        scores: list[ProductScore],
+        catalog_score: float,
+        errors: list[str],
+        source_name: str,
+    ):
+        self.products: list[Product] = products
+        self.scores: list[ProductScore] = scores
+        self.catalog_score: float = catalog_score
+        self.errors: list[str] = errors
+        self.source_name: str = source_name
 
 # a small file the shop owner can download and fill in
 Template_csv: str = (
@@ -38,6 +57,7 @@ Criterion_help: dict[str, str] = {
     "Disambiguation": "Is there anything an assistant cannot understand: numbers without units, vague claims, a wrong barcode?",
     "Price / content coherence": "Does the listing contradict itself, or give values that look wrong?",
     "Structuring": "Are the specs in the attributes column, or hidden in the description text?",
+    "Clear wording": "Is the text written for an AI assistant: facts instead of marketing words, a clear first sentence, no keyword stuffing?",
 }
 
 
@@ -88,33 +108,34 @@ def show_welcome() -> None:
     )
 
 
-def show_verdict(scores: list[ProductScore], catalog_score: float) -> None:
-    # green, orange or red box
+def show_verdict(result: AuditResult) -> None:
+    scores: list[ProductScore] = result.scores
     ready: int = count_ready(scores)
     to_fix: int = len(scores) - ready
 
-    message: str = f"**{catalog_score} / 100**: {ready} of {len(scores)} listings are ready, {to_fix} need work."
-    if catalog_score >= Pass_score:
+    message: str = f"**{result.catalog_score} / 100**: {ready} of {len(scores)} listings are ready, {to_fix} need work."
+    # same green / orange / red grading as the html report
+    grade: str = level(result.catalog_score)
+    if grade == "good":
         st.success(message)
-    elif catalog_score >= 70:
+    elif grade == "medium":
         st.warning(message)
     else:
         st.error(message)
 
 
-def show_overview(scores: list[ProductScore], catalog_score: float) -> None:
+def show_overview(result: AuditResult) -> None:
+    scores: list[ProductScore] = result.scores
     left, middle, right = st.columns(3)
-    left.metric("AI readability score", f"{catalog_score} / 100", help=f"A listing counts as ready from {Pass_score} points.")
+    left.metric("AI readability score", f"{result.catalog_score} / 100", help=f"A listing counts as ready from {Pass_score} points.")
     middle.metric("Ready listings", f"{count_ready(scores)} of {len(scores)}")
     right.metric("Shopper questions not matched", count_unanswered(scores), help="See the Shopper questions tab.")
 
     st.subheader("Score by criterion")
     percentages: dict[str, int] = criterion_percentages(scores)
-    columns = st.columns(len(Criteria))
-    for index in range(len(Criteria)):
-        name: str = Criteria[index]
-        columns[index].metric(name, f"{percentages[name]}%", help=Criterion_help[name])
-        columns[index].progress(percentages[name] / 100) # needs a value from 0 to 1
+    for name, column in zip(Criteria, st.columns(len(Criteria))):
+        column.metric(name, f"{percentages[name]}%", help=Criterion_help[name])
+        column.progress(percentages[name] / 100) # needs a value from 0 to 1
 
     problems: list[tuple[str, int]] = most_common_problems(scores, limit=3)
     if len(problems) > 0:
@@ -123,11 +144,11 @@ def show_overview(scores: list[ProductScore], catalog_score: float) -> None:
             st.markdown(f"**{Rule_names[rule]}** ({count} listing(s))  \n{How_to_fix[rule]}")
 
 
-def show_listings(scores: list[ProductScore]) -> None:
+def show_listings(result: AuditResult) -> None:
     only_to_fix: bool = st.toggle("Show only listings that need work", value=True)
 
     # worst first
-    sorted_scores: list[ProductScore] = sorted(scores, key=score_of)
+    sorted_scores: list[ProductScore] = sorted(result.scores, key=score_of)
 
     rows: list[dict] = []
     for product_score in sorted_scores:
@@ -162,8 +183,8 @@ def show_listings(scores: list[ProductScore]) -> None:
                 st.markdown(f"**Cannot be matched**: {question}")
 
 
-def show_questions(products: list[Product]) -> None:
-    summary: list[dict] = question_summary(products)
+def show_questions(result: AuditResult) -> None:
+    summary: list[dict] = question_summary(result.products)
     if len(summary) == 0:
         st.info("No shopper questions for the categories in this file.")
         return
@@ -182,27 +203,31 @@ def show_questions(products: list[Product]) -> None:
     st.dataframe(rows, hide_index=True, width="stretch")
 
 
-def show_downloads(scores: list[ProductScore], catalog_score: float, errors: list[str], source_name: str) -> None:
+def show_downloads(result: AuditResult) -> None:
     st.markdown("Keep a copy of the results, or send the report to a colleague.")
-    page: str = html_report(scores, catalog_score, errors, source_name, Sector)
-    data: dict = json_report(scores, catalog_score, errors, source_name, Sector)
+    page: str = html_report(result.scores, result.catalog_score, result.errors, result.source_name, Sector)
+    data: dict = json_report(result.scores, result.catalog_score, result.errors, result.source_name, Sector)
     left, right = st.columns(2)
     left.download_button("Report (HTML)", page, file_name="shelfready_report.html", mime="text/html")
     right.download_button("Results (JSON)", json.dumps(data, indent=2, ensure_ascii=False), file_name="shelfready_results.json", mime="application/json")
 
-    if len(errors) > 0:
+    st.subheader("AI-ready feed")
+    st.markdown(
+        "A supplemental feed for Google Merchant Center, made from your own specs. "
+        "It adds **product highlights** and **questions and answers**, two attributes that "
+        "Google AI Mode and Gemini read. Check it, then add it in Merchant Center as a supplemental data source. "
+        "Listings whose specs disagree with the title or look wrong are left out until they are fixed."
+    )
+    st.download_button("AI-ready feed (TSV)", supplemental_feed(result.products), file_name="shelfready_ai_feed.tsv", mime="text/tab-separated-values")
+
+    if len(result.errors) > 0:
         st.subheader("Rows that could not be read")
-        for error in errors:
+        for error in result.errors:
             st.warning(error)
 
 
-def main() -> None:
-    st.set_page_config(page_title="ShelfReady", page_icon="🛒", layout="wide")
-    show_sidebar()
-    st.title("ShelfReady")
-    st.write("Will an AI shopping assistant understand and recommend your products?")
-    st.caption(f"Sector: {Sector}. Your file stays on this computer.")
-
+def load_input() -> AuditResult | None:
+    # reads the uploaded file (or the sample), or shows the welcome and returns None when there is nothing to score
     uploaded = st.file_uploader("Upload your product CSV", type=["csv"])
     use_sample: bool = st.checkbox("Try the sample outdoor shop instead")
 
@@ -216,32 +241,45 @@ def main() -> None:
             text = decode_bytes(Sample_file.read_bytes(), source_name)
         else:
             show_welcome()
-            return
+            return None
         products: list[Product]
         errors: list[str]
         products, errors = load_products_from_text(text)
     except LoaderError as error:
         st.error(f"This file cannot be read. {error}")
-        return
+        return None
 
     if len(products) == 0:
         st.warning("No product could be read from this file. Check that it has the columns id, title and price.")
-        return
+        return None
 
     scores: list[ProductScore]
     catalog_score: float
     scores, catalog_score = score_catalog(products)
+    return AuditResult(products, scores, catalog_score, errors, source_name)
 
-    show_verdict(scores, catalog_score)
+
+def main() -> None:
+    st.set_page_config(page_title="ShelfReady", page_icon="🛒", layout="wide")
+    show_sidebar()
+    st.title("ShelfReady")
+    st.write("Will an AI shopping assistant understand and recommend your products?")
+    st.caption(f"Sector: {Sector}. Your file stays on this computer.")
+
+    result: AuditResult | None = load_input()
+    if result is None:
+        return
+
+    show_verdict(result)
     overview, listings, questions, downloads = st.tabs(["Overview", "Listings", "Shopper questions", "Download"])
     with overview:
-        show_overview(scores, catalog_score)
+        show_overview(result)
     with listings:
-        show_listings(scores)
+        show_listings(result)
     with questions:
-        show_questions(products)
+        show_questions(result)
     with downloads:
-        show_downloads(scores, catalog_score, errors, source_name)
+        show_downloads(result)
 
 
 if __name__ == "__main__":

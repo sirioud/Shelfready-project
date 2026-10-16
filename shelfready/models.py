@@ -4,6 +4,8 @@ Product = one row of the shop's csv file
 RuleResult = the result of one check on one product
 """
 
+from .attributes import parse_attributes
+
 
 class Product:
     # id has no default -> a product cannot exist without an id, other values can be empty cells
@@ -32,9 +34,21 @@ class Product:
         self.brand: str = brand
         self.image_url: str = image_url
         self.attributes: str = attributes
+        self._parsed: dict[str, str] | None = None # cache for attrs(), filled on first use
+
+    def attrs(self) -> dict[str, str]:
+        # the attributes column parsed into {key: value}, computed once and reused
+        # almost every rule needs this, so parsing it one time per product avoids the repeated work
+        if self._parsed is None:
+            self._parsed = parse_attributes(self.attributes)
+        return self._parsed
+
+    def text(self) -> str:
+        # title and description together, the free text most rules scan
+        return self.title + " " + self.description
 
     def __repr__(self) -> str:
-        return "Product(id='" + self.id + "', category='" + self.category + "', title='" + self.title + "')"
+        return f"Product(id='{self.id}', category='{self.category}', title='{self.title}')"
 
 
 class RuleResult:
@@ -45,4 +59,4 @@ class RuleResult:
         self.message: str = message # what to fix, empty if the rule passed
 
     def __repr__(self) -> str:
-        return "RuleResult(rule='" + self.rule + "', passed=" + str(self.passed) + ", points=" + str(self.points) + ")"
+        return f"RuleResult(rule='{self.rule}', passed={self.passed}, points={self.points})"

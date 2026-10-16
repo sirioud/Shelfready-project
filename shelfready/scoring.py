@@ -4,7 +4,7 @@ from .models import Product, RuleResult
 from .questions import unanswered_questions
 from .rules import All_rules
 
-Pass_score: int = 90 # minimum score to count as "likely to be recommended". example value, to be decided
+Pass_score: int = 90 # minimum score (out of 100) for a listing to count as "likely to be recommended"
 
 # if one of these rules fails, the listing is not ready whatever its score
 # feed_standard: google merchant center would reject the listing (no title, no price, wrong availability...)

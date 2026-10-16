@@ -15,8 +15,8 @@ class CliTests(unittest.TestCase):
         with redirect_stdout(output):
             code = main(["audit", str(Sample)])
         self.assertEqual(code, 0)
-        self.assertIn("AI readability score: 85.5 / 100", output.getvalue())
-        self.assertIn("Products likely to be recommended: 4 of 10", output.getvalue())
+        self.assertIn("AI readability score: 85.3 / 100", output.getvalue())
+        self.assertIn("Products likely to be recommended: 5 of 10", output.getvalue())
 
     def test_audit_writes_html_report(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -28,6 +28,18 @@ class CliTests(unittest.TestCase):
             self.assertTrue(target.exists())
             self.assertIn("ShelfReady report", target.read_text(encoding="utf-8"))
             self.assertIn("HTML report written to", output.getvalue())
+
+    def test_audit_writes_ai_ready_feed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "feed.tsv"
+            output = io.StringIO()
+            with redirect_stdout(output):
+                code = main(["audit", str(Sample), "--feed", str(target)])
+            self.assertEqual(code, 0)
+            lines: list[str] = target.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(lines[0], "id\tproduct_highlight\tquestion_and_answer")
+            self.assertTrue(lines[1].startswith("P001\t"))
+            self.assertIn("AI-ready feed written to", output.getvalue())
 
     def test_missing_file(self):
         errors = io.StringIO()

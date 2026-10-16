@@ -2,7 +2,7 @@
 For each listing: yes, no, or unknown when the attribute is missing.
 Unknown = the assistant can never show the listing for that question. Not part of the score."""
 
-from .attributes import parse_attributes, plain_name, to_number
+from .attributes import plain_name, to_number
 from .models import Product
 from .sector import Shopper_questions
 
@@ -24,7 +24,7 @@ def answer_question(product: Product, question: tuple) -> str:
     attribute: str = question[1]
     test: str = question[2]
     wanted = question[3] # a number for at_least / at_most, a text for equals
-    found: dict[str, str] = parse_attributes(product.attributes)
+    found: dict[str, str] = product.attrs()
 
     if attribute not in found:
         return Unknown

@@ -22,17 +22,18 @@ class AppTests(unittest.TestCase):
         app = AppTest.from_file(str(App_file)).run()
         app.checkbox[0].check().run()
         self.assertEqual(len(app.exception), 0)
-        self.assertEqual(app.metric[0].value, "85.5 / 100")
-        self.assertEqual(app.metric[1].value, "4 of 10")
-        # the verdict at the top, then the two skipped rows of the sample file
+        self.assertEqual(app.metric[0].value, "85.3 / 100")
+        self.assertEqual(app.metric[1].value, "5 of 10")
+        # the sample scores 85.3, which grades "good", so the verdict is a green success box
+        self.assertIn("5 of 10 listings are ready", app.success[0].value)
+        # the two skipped rows of the sample file are shown as warnings
         warnings: list[str] = []
         for box in app.warning:
             warnings.append(box.value)
-        self.assertIn("4 of 10 listings are ready", warnings[0])
         self.assertIn("Line 9: missing id", warnings)
         self.assertIn("Line 12: price is not a number", warnings)
         # the listings tab opens on the worst listing
-        self.assertIn("P003", app.expander[0].label)
+        self.assertIn("P005", app.expander[0].label)
 
 
 if __name__ == "__main__":

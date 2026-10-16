@@ -32,7 +32,7 @@ class HtmlReportTests(unittest.TestCase):
     def test_criterion_percentages(self):
         percentages = criterion_percentages(self.scores)
         self.assertEqual(set(percentages), {
-            "Distinctive attributes", "Disambiguation", "Price / content coherence", "Structuring",
+            "Distinctive attributes", "Disambiguation", "Price / content coherence", "Structuring", "Clear wording",
         })
         self.assertEqual(percentages["Distinctive attributes"], 100)
         self.assertLess(percentages["Disambiguation"], 100)

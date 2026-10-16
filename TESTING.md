@@ -25,7 +25,7 @@ side bar). `.vscode/settings.json` already configures it.
 ```
 ss..................................................................
 ----------------------------------------------------------------------
-Ran 68 tests in 0.024s
+Ran 94 tests in 0.032s
 
 OK (skipped=2)
 ```
@@ -93,15 +93,16 @@ The tests are in `shelfready/tests/`. There is one test file per module.
 
 | File | Tests | Module tested | What it checks |
 |---|---|---|---|
-| `test_rules.py` | 18 | `rules.py` | Each rule (GTIN, brand, specs, ...) on good and broken listings |
+| `test_rules.py` | 34 | `rules.py` | Each rule (GTIN, brand, specs, marketing words, keyword stuffing, ...) on good and broken listings |
 | `test_loader.py` | 13 | `loader.py` | Reading CSV files: missing columns, invalid prices, skipped rows |
 | `test_attributes.py` | 11 | `attributes.py` | Reading specs such as `volume_l: 30 \| weight_g: 900` |
 | `test_scoring.py` | 8 | `scoring.py` | Listing score, catalog average, "ready" and "blocked" listings |
 | `test_report.py` | 8 | `report.py` | The HTML and JSON reports |
-| `test_cli.py` | 4 | `__main__.py` | The `python -m shelfready audit` command |
+| `test_cli.py` | 5 | `__main__.py` | The `python -m shelfready audit` command, with `--html` and `--feed` |
 | `test_questions.py` | 4 | `questions.py` | Which shopper questions a listing can answer |
 | `test_app.py` | 2 | `shelfready_app.py` | The Streamlit web page |
-| **Total** | **68** | | |
+| `test_feed.py` | 9 | `feed.py` | The AI-ready feed: highlights, questions and answers, file format, listings left out |
+| **Total** | **94** | | |
 
 Tests that need a file (CSV input, HTML report) create it in a temporary
 folder with `tempfile`, so running the tests never changes the files in
@@ -117,7 +118,7 @@ not failed:
 @unittest.skipUnless(Has_streamlit, "streamlit is not installed in this environment")
 ```
 
-Run the tests in `nomades_nppd_312` to see all 68 pass.
+Run the tests in `nomades_nppd_312` to see all 94 pass.
 
 ## Adding a test
 

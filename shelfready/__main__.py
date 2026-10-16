@@ -1,9 +1,10 @@
-"""Command line: python -m shelfready audit FILE.csv [--html PATH]"""
+"""Command line: python -m shelfready audit FILE.csv [--html PATH] [--feed PATH]"""
 
 import argparse
 import sys
 from pathlib import Path
 
+from .feed import write_supplemental_feed
 from .loader import LoaderError, load_products
 from .models import Product
 from .report import terminal_report, write_html_report
@@ -21,6 +22,7 @@ def build_parser() -> argparse.ArgumentParser:
     audit: argparse.ArgumentParser = sub.add_parser("audit", help="Score a product CSV file")
     audit.add_argument("csv_file")
     audit.add_argument("--html", metavar="PATH", help="also write an HTML report to PATH")
+    audit.add_argument("--feed", metavar="PATH", help="also write an AI-ready supplemental feed (TSV) for Google Merchant Center to PATH")
     return parser
 
 
@@ -39,6 +41,10 @@ def run_audit(args: argparse.Namespace) -> None:
         source_name: str = Path(args.csv_file).name
         path: Path = write_html_report(args.html, scores, catalog_score, errors, source_name=source_name, sector=Sector)
         print(f"\nHTML report written to {path}")
+
+    if args.feed:
+        feed_path: Path = write_supplemental_feed(args.feed, products)
+        print(f"\nAI-ready feed written to {feed_path}")
 
 
 def main(argv: list[str] | None = None) -> int:

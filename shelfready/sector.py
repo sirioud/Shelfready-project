@@ -98,3 +98,38 @@ Shopper_questions: dict[str, list[tuple]] = {
         ("Unisex shoes", "gender", "equals", "unisex"),
     ],
 }
+
+# GEO (generative engine optimization): AI assistants quote facts, not marketing claims
+# Aggarwal et al., KDD 2024: numbers raise visibility, an authoritative tone does not
+Marketing_words: list[str] = [
+    "premium", "ultimate", "best", "best-in-class", "revolutionary", "innovative",
+    "high-quality", "high quality", "top quality", "world-class", "unbeatable", "amazing",
+    "perfect", "incredible", "exceptional", "state-of-the-art", "cutting-edge", "must-have",
+    "superior", "unique", "legendary", "game-changing",
+]
+
+# words that say what the product is, per category. the description must start with one of them
+Category_words: dict[str, list[str]] = {
+    "backpack": ["backpack", "daypack", "rucksack", "pack"],
+    "sleeping_bag": ["sleeping bag", "quilt"],
+    "headlamp": ["headlamp", "head lamp", "head torch"],
+    "bottle": ["bottle", "flask"],
+    "stove": ["stove", "burner"],
+    "shoes": ["shoe", "shoes", "boot", "boots", "trainer", "trainers", "sneakers"],
+    "socks": ["sock", "socks"],
+}
+
+# shopper questions written as a question, for the AI-ready feed (question_and_answer in google merchant center)
+Feed_question_wording: dict[str, str] = {
+    "A backpack of 30 l or more for a weekend": "Is it big enough for a weekend (30 l or more)?",
+    "A backpack under 1 kg": "Does it weigh less than 1 kg?",
+    "A sleeping bag for a night at -5 °C": "Is it warm enough for a night at -5 °C?",
+    "A sleeping bag under 1.5 kg": "Does it weigh less than 1.5 kg?",
+    "A headlamp of 300 lm or more": "Does it give 300 lm or more?",
+    "A headlamp that lasts 8 h or more": "Does the battery last 8 h or more?",
+    "A bottle of 750 ml or more": "Does it hold 750 ml or more?",
+    "A bottle under 200 g": "Does it weigh less than 200 g?",
+    "A stove under 100 g": "Does it weigh less than 100 g?",
+    "Shoes in EU size 42": "Is it EU size 42?",
+    "Unisex shoes": "Is it unisex?",
+}
