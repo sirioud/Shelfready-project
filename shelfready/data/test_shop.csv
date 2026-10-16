@@ -1,0 +1,14 @@
+id,category,title,description,price,currency,availability,gtin,brand,image_url,attributes
+T01,sleeping_bag,Winter down sleeping bag -8,"Mummy sleeping bag for winter camping, with a hood, a draught collar and a two-way zip. Comfort -2 °C, limit -8 °C, extreme -24 °C.",389.00,CHF,in_stock,4006381333931,Nordwear,https://example.com/img/t01.jpg,comfort_c: -2 | limit_c: -8 | extreme_c: -24 | weight_g: 1250 | material: down
+T02,headlamp,Trail headlamp 350 lm,Headlamp with 350 lm on high and 12 h of runtime on low. Weighs 78 g with the battery.,59.-,CHF,in_stock,5901234123457,Lumo,https://example.com/img/t02.jpg,lumens_lm: 350 | runtime_h: 12 | weight_g: 78
+T03,backpack,Expedition pack 65 l,"Large trekking pack for multi-day trips, with an adjustable back system, a removable lid and hip belt pockets. Holds 65 l and weighs 2100 g.",1'299.00,CHF,in_stock,4006381333931,Alpenwerk,https://example.com/img/t03.jpg,volume_l: 65 | weight_g: 2100 | material: cordura
+T04,tent,Two-person tent,Lightweight two-person tent for summer hiking.,349.00,EUR,in_stock,5901234123457,Terrano,https://example.com/img/t04.jpg,material: nylon
+T05,shoes,Approach shoes Granite,Sticky rubber sole for scrambling and via ferrata.,149.00,EUR,in_stock,96385074,Stride,https://example.com/img/t05.jpg,size: 43 | color: grey
+T06,stove,Canister stove Blaze,Compact stove compatible with MSR IsoPro cartridges. Boils 1 l of water in 3 minutes.,65.00,EUR,in_stock,4006381333931,Blaze,https://example.com/img/t06.jpg,power_w: 2800 | fuel: butane/propane | weight_g: 85
+T07,jacket,Rain jacket Storm,"Waterproof jacket with taped seams, a helmet-compatible hood and pit zips.",219.00,EUR,In Stock,5901234123457,Nordwear,https://example.com/img/t07.jpg,size: M | color: red | material: polyester
+T08,bottle,Insulated bottle 1 l,Keeps drinks hot for 12 h and cold for 24 h.,39.90,EUR,in_stock,036000291452,Clearo,https://example.com/img/t08.jpg,capacity_ml: 1000 | weight_g: 450 | material: steel
+T09,socks,Trail socks pack of 3,Light trail running socks.,24,EUR,in_stock,4006381333931,Greenly,https://example.com/img/t09.jpg,size: 39-42 | size_system: EU | color: black | gender: unisex | age_group: adult | pack_size: 3
+T10,backpack,Kids daypack,Small daypack for children aged 6 to 10.,,EUR,in_stock,4006381333931,Urbo,https://example.com/img/t10.jpg,volume_l: 12 | weight_g: 350 | material: polyester
+T02,headlamp,Trail headlamp 350 lm (duplicate),Same id as another row.,59.00,CHF,in_stock,5901234123457,Lumo,https://example.com/img/t02b.jpg,lumens_lm: 350 | runtime_h: 12 | weight_g: 78
+T12,bottle,Soft flask 500 ml,<p>Soft flask for <b>trail running</b>. Holds 500 ml.</p>,22.00,EUR,in_stock,5901234123457,Clearo,https://example.com/img/t12.jpg,capacity_ml: 500 | weight_g: 30 | material: TPU
+T13,headlamp,,Headlamp without a title.,29.00,EUR,in_stock,4006381333931,Lumo,https://example.com/img/t13.jpg,lumens_lm: 200 | runtime_h: 8 | weight_g: 60
