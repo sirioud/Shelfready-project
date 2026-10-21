@@ -264,7 +264,7 @@ def main() -> None:
     show_sidebar()
     st.title("ShelfReady")
     st.write("Will an AI shopping assistant understand and recommend your products?")
-    st.caption(f"Sector: {SECTOR}. Your file stays on this computer.")
+    st.caption(f"Sector: {SECTOR}. Your file is only read to score it, never saved.")
 
     result: AuditResult | None = load_input()
     if result is None:
