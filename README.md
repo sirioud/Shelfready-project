@@ -79,18 +79,6 @@ The page is deployed on Render (free plan) as a Docker container built from the
 docs are not copied into the image. Render's health check calls
 `/_stcore/health`.
 
-Render builds from the personal repository
-[sirioud/Shelfready-project](https://github.com/sirioud/Shelfready-project),
-because the Nomades GitHub organisation has not approved the Render app. Both
-repositories contain the same code, and a push to the personal one redeploys
-the site.
-
-On the free plan the site goes to sleep after about 15 minutes without
-visitors, so the first page can take up to a minute to load. An uploaded file
-is sent to the Render server to be scored. It is only read in memory and never
-saved, but if the catalog data must not leave your computer, run the page
-locally.
-
 To run the same image on your own computer:
 
 ```bash
