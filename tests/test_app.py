@@ -8,18 +8,18 @@ try:
 except ImportError:
     Has_streamlit = False
 
-App_file: Path = Path(__file__).parent.parent / "shelfready_app.py"
+APP_FILE: Path = Path(__file__).parent.parent / "shelfready_app.py"
 
 
 @unittest.skipUnless(Has_streamlit, "streamlit is not installed in this environment")
 class AppTests(unittest.TestCase):
     def test_start_page_asks_for_a_file(self):
-        app = AppTest.from_file(str(App_file)).run()
+        app = AppTest.from_file(str(APP_FILE)).run()
         self.assertEqual(len(app.exception), 0)
         self.assertIn("Upload a CSV file", app.info[0].value)
 
     def test_sample_shop(self):
-        app = AppTest.from_file(str(App_file)).run()
+        app = AppTest.from_file(str(APP_FILE)).run()
         app.checkbox[0].check().run()
         self.assertEqual(len(app.exception), 0)
         self.assertEqual(app.metric[0].value, "85.3 / 100")

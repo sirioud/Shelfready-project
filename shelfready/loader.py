@@ -1,6 +1,6 @@
-"""The loader reads the product csv file and turns each row into a Product object.
-It stops if the whole file is unusable (file missing, required columns missing).
-If only one row is bad (no id, price is not a number) it skips that row, notes it and continues."""
+#The loader reads the product csv file and turns each row into a Product object.
+#It stops if the whole file is unusable (file missing, required columns missing).
+#If only one row is bad (no id, price is not a number) it skips that row, notes it and continues."""
 
 import csv
 import io
@@ -9,7 +9,7 @@ from pathlib import Path
 from .models import Product
 
 # columns the file must have, otherwise we cannot do anything
-Required_columns: set[str] = {"id", "title", "price"}
+REQUIRED_COLUMNS: set[str] = {"id", "title", "price"}
 
 
 class LoaderError(Exception):
@@ -87,7 +87,7 @@ def load_products_from_text(text: str) -> tuple[list[Product], list[str]]:
     if reader.fieldnames is not None:
         header = list(reader.fieldnames)
     missing: list[str] = []
-    for column in Required_columns:
+    for column in REQUIRED_COLUMNS:
         if column not in header:
             missing.append(column)
     if len(missing) > 0:

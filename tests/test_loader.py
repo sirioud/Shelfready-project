@@ -4,7 +4,7 @@ from pathlib import Path
 
 from shelfready.loader import LoaderError, load_products, load_products_from_text, parse_price
 
-Header = "id,category,title,description,price,currency,availability,gtin,brand,image_url,attributes\n"
+HEADER = "id,category,title,description,price,currency,availability,gtin,brand,image_url,attributes\n"
 
 
 class LoaderTests(unittest.TestCase):
@@ -21,7 +21,7 @@ class LoaderTests(unittest.TestCase):
         return path
 
     def test_reads_valid_row(self):
-        path = self.write_csv(Header + "P1,mug,Mug,Nice mug,12.5,EUR,in_stock,,,,material: ceramic\n")
+        path = self.write_csv(HEADER + "P1,mug,Mug,Nice mug,12.5,EUR,in_stock,,,,material: ceramic\n")
         products, errors = load_products(path)
         self.assertEqual(len(products), 1)
         self.assertEqual(products[0].price, 12.5)
@@ -29,19 +29,19 @@ class LoaderTests(unittest.TestCase):
         self.assertEqual(errors, [])
 
     def test_skips_row_without_id(self):
-        path = self.write_csv(Header + ",mug,Mug,,12,EUR,,,,,\n")
+        path = self.write_csv(HEADER + ",mug,Mug,,12,EUR,,,,,\n")
         products, errors = load_products(path)
         self.assertEqual(products, [])
         self.assertIn("missing id", errors[0])
 
     def test_skips_row_with_bad_price(self):
-        path = self.write_csv(Header + "P1,mug,Mug,,abc,EUR,,,,,\n")
+        path = self.write_csv(HEADER + "P1,mug,Mug,,abc,EUR,,,,,\n")
         products, errors = load_products(path)
         self.assertEqual(products, [])
         self.assertIn("price", errors[0])
 
     def test_skips_duplicate_id(self):
-        path = self.write_csv(Header + "P1,mug,Mug,,12,EUR,,,,,\n" + "P1,mug,Other mug,,14,EUR,,,,,\n")
+        path = self.write_csv(HEADER + "P1,mug,Mug,,12,EUR,,,,,\n" + "P1,mug,Other mug,,14,EUR,,,,,\n")
         products, errors = load_products(path)
         self.assertEqual(len(products), 1)
         self.assertEqual(products[0].title, "Mug")
@@ -50,13 +50,13 @@ class LoaderTests(unittest.TestCase):
     def test_reads_excel_utf8_file(self):
         # Excel puts an invisible mark (BOM) before the first column name
         path = self.folder / "excel.csv"
-        path.write_text(Header + "P1,mug,Mug,,12,EUR,,,,,\n", encoding="utf-8-sig")
+        path.write_text(HEADER + "P1,mug,Mug,,12,EUR,,,,,\n", encoding="utf-8-sig")
         products, errors = load_products(path)
         self.assertEqual(len(products), 1)
 
     def test_reads_old_windows_file(self):
         path = self.folder / "windows.csv"
-        path.write_text(Header + "P1,mug,Mug café,,12,EUR,,,,,\n", encoding="cp1252")
+        path.write_text(HEADER + "P1,mug,Mug café,,12,EUR,,,,,\n", encoding="cp1252")
         products, errors = load_products(path)
         self.assertEqual(products[0].title, "Mug café")
 
@@ -66,14 +66,14 @@ class LoaderTests(unittest.TestCase):
 
     def test_line_numbers_with_multiline_description(self):
         # the description of P1 goes over two lines, so the next row starts on line 4
-        path = self.write_csv(Header + 'P1,mug,Mug,"First line\nsecond line",12,EUR,,,,,\n' + ",mug,No id,,12,EUR,,,,,\n")
+        path = self.write_csv(HEADER + 'P1,mug,Mug,"First line\nsecond line",12,EUR,,,,,\n' + ",mug,No id,,12,EUR,,,,,\n")
         products, errors = load_products(path)
         self.assertEqual(products[0].description, "First line\nsecond line")
         self.assertEqual(errors, ["Line 4: missing id"])
 
     def test_load_from_text(self):
         # the web page gives text, not a path
-        products, errors = load_products_from_text(Header + "P1,mug,Mug,,12,EUR,,,,,\n")
+        products, errors = load_products_from_text(HEADER + "P1,mug,Mug,,12,EUR,,,,,\n")
         self.assertEqual(products[0].id, "P1")
         self.assertEqual(errors, [])
 

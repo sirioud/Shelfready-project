@@ -6,14 +6,14 @@ from pathlib import Path
 
 from shelfready.__main__ import main
 
-Sample = Path(__file__).parent.parent / "shelfready" / "data" / "sample_products.csv"
+SAMPLE = Path(__file__).parent.parent / "shelfready" / "data" / "sample_products.csv"
 
 
 class CliTests(unittest.TestCase):
     def test_audit_sample_file(self):
         output = io.StringIO()
         with redirect_stdout(output):
-            code = main(["audit", str(Sample)])
+            code = main(["audit", str(SAMPLE)])
         self.assertEqual(code, 0)
         self.assertIn("AI readability score: 85.3 / 100", output.getvalue())
         self.assertIn("Products likely to be recommended: 5 of 10", output.getvalue())
@@ -23,7 +23,7 @@ class CliTests(unittest.TestCase):
             target = Path(tmp) / "reports" / "report.html"
             output = io.StringIO()
             with redirect_stdout(output):
-                code = main(["audit", str(Sample), "--html", str(target)])
+                code = main(["audit", str(SAMPLE), "--html", str(target)])
             self.assertEqual(code, 0)
             self.assertTrue(target.exists())
             self.assertIn("ShelfReady report", target.read_text(encoding="utf-8"))
@@ -34,7 +34,7 @@ class CliTests(unittest.TestCase):
             target = Path(tmp) / "feed.tsv"
             output = io.StringIO()
             with redirect_stdout(output):
-                code = main(["audit", str(Sample), "--feed", str(target)])
+                code = main(["audit", str(SAMPLE), "--feed", str(target)])
             self.assertEqual(code, 0)
             lines: list[str] = target.read_text(encoding="utf-8").splitlines()
             self.assertEqual(lines[0], "id\tproduct_highlight\tquestion_and_answer")
@@ -51,7 +51,7 @@ class CliTests(unittest.TestCase):
     def test_folder_gives_clean_error(self):
         errors = io.StringIO()
         with redirect_stderr(errors):
-            code = main(["audit", str(Sample.parent)])
+            code = main(["audit", str(SAMPLE.parent)])
         self.assertEqual(code, 1)
         self.assertIn("Not a file", errors.getvalue())
 

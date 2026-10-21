@@ -1,8 +1,6 @@
-"""Data model for ShelfReady.
-
-Product = one row of the shop's csv file
-RuleResult = the result of one check on one product
-"""
+#Data model for ShelfReady.
+#Product = one row of the shop's csv file
+#RuleResult = the result of one check on one product
 
 from .attributes import parse_attributes
 
