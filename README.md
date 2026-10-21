@@ -21,6 +21,10 @@ It can be used two ways, with the same checks and the same scores:
 - a **web page** (Streamlit) for shop owners: upload a CSV, read the results, download the report;
 - a **command line** tool: `python -m shelfready audit FILE.csv`.
 
+**Try it online:** https://shelfready-project.onrender.com (see
+[Online version](#online-version-render)). Nothing to install: tick the
+sample shop or upload your own CSV.
+
 Both can also write an **AI-ready feed**: a Google Merchant Center supplemental
 feed, made from the shop's own specs, that AI Mode and Gemini read (see
 [GEO and the AI-ready feed](#geo-and-the-ai-ready-feed)).
@@ -30,7 +34,7 @@ against that sector's standards rather than applying generic rules.
 
 ## Principles
 
-- **Free and offline:** no account, no API key, no network. Catalog data stays on your computer, the web page included.
+- **Free and offline:** no account, no API key, no network. Run locally, catalog data stays on your computer, the web page included. The [online version](#online-version-render) is optional.
 - **Light:** the checks use the Python standard library only (Python 3.10 or newer). Only the web page needs Streamlit.
 - **Read-only:** the tool only reads the CSV. The shop and the original file are never changed.
 
@@ -40,6 +44,8 @@ against that sector's standards rather than applying generic rules.
 nomades_project/
 ├── shelfready_app.py        the Streamlit web page (display only)
 ├── requirements.txt         packages to install (Streamlit)
+├── requirements-freeze.txt the whole course environment, for the full Docker image
+├── Dockerfile               the image Render runs (see Online version)
 ├── README.md
 ├── docs/
 │   ├── TESTING.md           how the tests work
@@ -90,6 +96,39 @@ Upload a CSV, or tick **Try the sample outdoor shop instead**.
 The page only displays results. All the checking is done by the `shelfready`
 package, the same code the `audit` command uses, so both always give the same
 scores. The file is never sent anywhere.
+
+## Online version (Render)
+
+The web page is also online: **https://shelfready-project.onrender.com**
+
+- **Hosting:** [Render](https://render.com), free plan, as a Docker web service.
+- **Image:** built from the `Dockerfile` at the root: `python:3.12-slim`, the
+  packages in `requirements.txt` (Streamlit only), then `shelfready_app.py` and
+  the `shelfready/` package. Tests, docs and `.git` are left out by
+  `.dockerignore`.
+- **Port:** Render gives the port in `$PORT`; the container starts Streamlit
+  on it (8501 when run locally).
+- **Health check:** `/_stcore/health`, which answers `ok` when the app is up.
+- **Updates:** Render builds from the `main` branch of the personal repository
+  [sirioud/Shelfready-project](https://github.com/sirioud/Shelfready-project),
+  because the Nomades GitHub organisation has not approved the Render app. Both
+  repositories hold the same code; pushing to the personal one redeploys the
+  site.
+- **First visit:** on the free plan the service sleeps after about 15 minutes
+  without visitors, so the first page can take up to a minute to load.
+- **Your file:** online, the uploaded CSV is sent to the Render server to be
+  scored. The app only reads it in memory and never saves it. To keep catalog
+  data on your own computer, run the page locally (see [Web page](#web-page)).
+
+The same image also runs on any computer with Docker:
+
+```bash
+docker build -t shelfready .
+docker run -p 8501:8501 shelfready
+```
+
+Then open http://localhost:8501. A full image with the whole course
+environment is on Docker Hub as `sirioud/shelfready:full`.
 
 ## Command line
 
