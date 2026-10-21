@@ -6,6 +6,7 @@
 import json
 from pathlib import Path
 
+import pandas as pd # comes with streamlit, used to colour the table cells
 import streamlit as st
 
 from shelfready.feed import supplemental_feed
@@ -60,6 +61,16 @@ CRITERION_HELP: dict[str, str] = {
     "Clear wording": "Is the text written for an AI assistant: facts instead of marketing words, a clear first sentence, no keyword stuffing?",
 }
 
+# cell colours, same green / orange / red as the html report
+# a light background with dark text, so it stays readable in light and dark mode
+GOOD_CELL: str = "background-color: #d9efe6; color: #1f7a5a"
+MEDIUM_CELL: str = "background-color: #f8ead2; color: #8a5a12"
+POOR_CELL: str = "background-color: #f6dada; color: #b83232"
+
+STATUS_CELL: dict[str, str] = {"Ready": GOOD_CELL, "To fix": MEDIUM_CELL, "Blocked": POOR_CELL}
+# streamlit colour names for the status in the expander titles and badges
+STATUS_COLOUR: dict[str, str] = {"Ready": "green", "To fix": "orange", "Blocked": "red"}
+
 
 def status_of(product_score: ProductScore) -> str:
     if product_score.is_ready:
@@ -67,6 +78,20 @@ def status_of(product_score: ProductScore) -> str:
     if product_score.blocked:
         return "Blocked"
     return "To fix"
+
+
+def status_cell(status: str) -> str:
+    # css for one cell of the Status column
+    if status in STATUS_CELL:
+        return STATUS_CELL[status]
+    return ""
+
+
+def missing_cell(listings: str) -> str:
+    # css for the "Cannot be matched" column: red only when some listings are missing
+    if listings == "":
+        return ""
+    return POOR_CELL
 
 
 def score_of(product_score: ProductScore) -> int:
@@ -164,7 +189,10 @@ def show_listings(result: AuditResult) -> None:
     if len(rows) == 0:
         st.success("Every listing is ready. Nothing to fix.")
         return
-    st.dataframe(rows, hide_index=True, width="stretch")
+    # the status carries the colour, the score is shown as a bar out of 100
+    table = pd.DataFrame(rows).style.map(status_cell, subset=["Status"])
+    score_bar = st.column_config.ProgressColumn("Score", min_value=0, max_value=100, format="%d")
+    st.dataframe(table, hide_index=True, width="stretch", column_config={"Score": score_bar})
 
     st.subheader("What to change, listing by listing")
     for product_score in sorted_scores:
@@ -173,7 +201,11 @@ def show_listings(result: AuditResult) -> None:
         title: str = product_score.product.title
         if title == "":
             title = "(no title)"
-        with st.expander(f"{status_of(product_score)} · {product_score.product.id}  {title}  ({product_score.score} / 100)"):
+        status: str = status_of(product_score)
+        colour: str = STATUS_COLOUR[status]
+        # :colour[text] is streamlit markdown for coloured text
+        with st.expander(f":{colour}[**{status}**] · {product_score.product.id}  {title}  ({product_score.score} / 100)"):
+            st.badge(f"{status} · {product_score.score} / 100", color=colour)
             if product_score.blocked:
                 st.error("Google Shopping would reject this listing as it is. Fix this first.")
             for result in product_score.failed:
@@ -200,7 +232,8 @@ def show_questions(result: AuditResult) -> None:
             "Shown": ", ".join(entry["matches"]),
             "Cannot be matched": ", ".join(entry["unknown"]),
         })
-    st.dataframe(rows, hide_index=True, width="stretch")
+    table = pd.DataFrame(rows).style.map(missing_cell, subset=["Cannot be matched"])
+    st.dataframe(table, hide_index=True, width="stretch")
 
 
 def show_downloads(result: AuditResult) -> None:
