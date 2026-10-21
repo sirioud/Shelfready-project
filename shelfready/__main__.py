@@ -9,7 +9,7 @@ from .loader import LoaderError, load_products
 from .models import Product
 from .report import terminal_report, write_html_report
 from .scoring import ProductScore, score_catalog
-from .sector import Sector
+from .sector import SECTOR
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -39,7 +39,7 @@ def run_audit(args: argparse.Namespace) -> None:
 
     if args.html:
         source_name: str = Path(args.csv_file).name
-        path: Path = write_html_report(args.html, scores, catalog_score, errors, source_name=source_name, sector=Sector)
+        path: Path = write_html_report(args.html, scores, catalog_score, errors, source_name=source_name, sector=SECTOR)
         print(f"\nHTML report written to {path}")
 
     if args.feed:

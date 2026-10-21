@@ -83,7 +83,7 @@ Upload a CSV, or tick **Try the sample outdoor shop instead**.
 | Side bar | How it works in 4 steps, the columns the file needs, a **template CSV** to download, the categories that are checked |
 | Verdict | Catalog score and number of ready listings, in green (90 or more), orange (70 or more) or red |
 | **Overview** tab | AI readability score, ready listings, shopper questions not matched; the score per criterion with a progress bar; the 3 most common problems to **fix first** |
-| **Listings** tab | A table of listings sorted worst first, with a status (✅ Ready, 🔧 To fix, ⛔ Blocked). For each listing that needs work: every problem, how to fix it, the industry reference behind it, and the shopper questions it cannot match. A toggle hides the ready listings |
+| **Listings** tab | A table of listings sorted worst first, with a status (Ready, To fix or Blocked). For each listing that needs work: every problem, how to fix it, the industry reference behind it, and the shopper questions it cannot match. A toggle hides the ready listings |
 | **Shopper questions** tab | Each typical request, the listings that match it and the ones that cannot be matched |
 | **Download** tab | The HTML report, the results as JSON and the **AI-ready feed** (TSV); the rows of the file that could not be read |
 
@@ -134,7 +134,7 @@ for how the tests work and how to add one.
 
 ## Code style
 
-Constants use `Capitalized_case` (`Pass_score`, `Sample_file`), functions and
+Constants use `UPPER_CASE` (`PASS_SCORE`, `SAMPLE_FILE`), as PEP 8 recommends; functions and
 variables `snake_case`, classes `CamelCase`. Variables are typed
 (`score: int = 90`).
 
@@ -148,7 +148,7 @@ variables `snake_case`, classes `CamelCase`. Variables are typed
 | Structuring | Is the information in fields or buried in prose? | `structured_share` | 8 |
 | Clear wording | Is the text written for an AI assistant? | `facts_not_claims`, `keyword_stuffing`, `clear_opening` | 15 |
 
-A listing counts as likely to be recommended from 90 points (`Pass_score` in
+A listing counts as likely to be recommended from 90 points (`PASS_SCORE` in
 `scoring.py`), unless it is **blocked**: a listing that fails `feed_standard`
 (no title, no price, wrong availability, placeholder brand) would be rejected
 by Google Merchant Center, so it is never ready, whatever its score. Point

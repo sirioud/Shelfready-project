@@ -1,27 +1,27 @@
-"""Knowledge about the industry, kept as plain data. Sector: outdoor and sport gear.
-To audit another sector, change this file and the sample csv. The rules do not change."""
+#Knowledge about the industry, kept as plain data. Sector: outdoor and sport gear.
+#To audit another sector, change this file and the sample csv. The rules do not change."""
 
-Sector: str = "Outdoor and sport gear"
+SECTOR: str = "Outdoor and sport gear"
 
 # google merchant center asks for these on clothing and shoes (size_system is recommended)
-Apparel: list[str] = ["size", "size_system", "color", "gender", "age_group"]
+APPAREL: list[str] = ["size", "size_system", "color", "gender", "age_group"]
 
 # attributes each category must have
-Expected_attributes: dict[str, list[str]] = {
+EXPECTED_ATTRIBUTES: dict[str, list[str]] = {
     "backpack": ["volume_l", "weight_g", "material"],
     # EN ISO 23537: a sleeping bag is labelled with comfort, limit and extreme temperature
     "sleeping_bag": ["comfort_c", "limit_c", "extreme_c", "weight_g"],
     "headlamp": ["lumens_lm", "runtime_h", "weight_g"],
     "bottle": ["capacity_ml", "weight_g", "material"],
     "stove": ["power_w", "fuel", "weight_g"],
-    "shoes": Apparel,
-    "socks": Apparel,
+    "shoes": APPAREL,
+    "socks": APPAREL,
 }
 # used when the category is not in the list above
-Default_expected: list[str] = ["material"]
+DEFAULT_EXPECTED: list[str] = ["material"]
 
 # what each attribute key means, for the reports
-Attribute_labels: dict[str, str] = {
+ATTRIBUTE_LABELS: dict[str, str] = {
     "volume_l": "volume in litres",
     "weight_g": "weight in grams",
     "material": "material",
@@ -45,13 +45,13 @@ Attribute_labels: dict[str, str] = {
 }
 
 # values accepted by the shopping feed (google merchant center)
-Availability_values: set[str] = {"in_stock", "out_of_stock", "preorder", "backorder"}
+AVAILABILITY_VALUES: set[str] = {"in_stock", "out_of_stock", "preorder", "backorder"}
 # brand names that mean "no brand"
-Placeholder_brands: set[str] = {"n/a", "na", "none", "generic", "no brand", "unknown"}
+PLACEHOLDER_BRANDS: set[str] = {"n/a", "na", "none", "generic", "no brand", "unknown"}
 
 # usual range for each number, [lowest, highest]. a value outside is probably a typo or a wrong unit
 # e.g. weight_g: 1.2 is a sleeping bag weight written in kg instead of g
-Plausible_ranges: dict[str, list[int]] = {
+PLAUSIBLE_RANGES: dict[str, list[int]] = {
     "weight_g": [5, 10000],
     "volume_l": [1, 120],
     "capacity_ml": [50, 5000],
@@ -65,7 +65,7 @@ Plausible_ranges: dict[str, list[int]] = {
 
 # attributes that must go down from left to right
 # EN ISO 23537: comfort temperature > limit temperature > extreme temperature
-Decreasing_attributes: list[list[str]] = [
+DECREASING_ATTRIBUTES: list[list[str]] = [
     ["comfort_c", "limit_c", "extreme_c"],
 ]
 
@@ -73,7 +73,7 @@ Decreasing_attributes: list[list[str]] = [
 # each question is: (what the shopper asks, attribute needed, test, value)
 # tests: "at_least", "at_most", "equals"
 # if the listing does not have the attribute, the assistant cannot match it to the question
-Shopper_questions: dict[str, list[tuple]] = {
+SHOPPER_QUESTIONS: dict[str, list[tuple]] = {
     "backpack": [
         ("A backpack of 30 l or more for a weekend", "volume_l", "at_least", 30),
         ("A backpack under 1 kg", "weight_g", "at_most", 1000),
@@ -101,7 +101,7 @@ Shopper_questions: dict[str, list[tuple]] = {
 
 # GEO (generative engine optimization): AI assistants quote facts, not marketing claims
 # Aggarwal et al., KDD 2024: numbers raise visibility, an authoritative tone does not
-Marketing_words: list[str] = [
+MARKETING_WORDS: list[str] = [
     "premium", "ultimate", "best", "best-in-class", "revolutionary", "innovative",
     "high-quality", "high quality", "top quality", "world-class", "unbeatable", "amazing",
     "perfect", "incredible", "exceptional", "state-of-the-art", "cutting-edge", "must-have",
@@ -109,7 +109,7 @@ Marketing_words: list[str] = [
 ]
 
 # words that say what the product is, per category. the description must start with one of them
-Category_words: dict[str, list[str]] = {
+CATEGORY_WORDS: dict[str, list[str]] = {
     "backpack": ["backpack", "daypack", "rucksack", "pack"],
     "sleeping_bag": ["sleeping bag", "quilt"],
     "headlamp": ["headlamp", "head lamp", "head torch"],
@@ -120,7 +120,7 @@ Category_words: dict[str, list[str]] = {
 }
 
 # shopper questions written as a question, for the AI-ready feed (question_and_answer in google merchant center)
-Feed_question_wording: dict[str, str] = {
+FEED_QUESTION_WORDING: dict[str, str] = {
     "A backpack of 30 l or more for a weekend": "Is it big enough for a weekend (30 l or more)?",
     "A backpack under 1 kg": "Does it weigh less than 1 kg?",
     "A sleeping bag for a night at -5 °C": "Is it warm enough for a night at -5 °C?",

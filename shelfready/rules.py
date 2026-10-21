@@ -1,56 +1,56 @@
-"""The fourteen AI-readability rules.
-Every rule takes one Product and gives back one RuleResult."""
+#The fourteen AI-readability rules.
+#Every rule takes one Product and gives back one RuleResult."""
 
 import re
 
-from .attributes import Quantity_phrase, Unit_of_key, bare_numbers, plain_name, specs_in_text, to_number
+from .attributes import QUANTITY_PHRASE, UNIT_OF_KEY, bare_numbers, plain_name, specs_in_text, to_number
 from .models import Product, RuleResult
 from .sector import (
-    Availability_values,
-    Category_words,
-    Decreasing_attributes,
-    Default_expected,
-    Expected_attributes,
-    Marketing_words,
-    Placeholder_brands,
-    Plausible_ranges,
+    AVAILABILITY_VALUES,
+    CATEGORY_WORDS,
+    DECREASING_ATTRIBUTES,
+    DEFAULT_EXPECTED,
+    EXPECTED_ATTRIBUTES,
+    MARKETING_WORDS,
+    PLACEHOLDER_BRANDS,
+    PLAUSIBLE_RANGES,
 )
 
-Min_attributes: int = 3 # a listing needs at least 3 attributes to be compared
-Premium_price: float = 100.0 # from this price, a short description looks suspicious
-Min_premium_description: int = 120 # characters
-Min_structured_share: float = 0.5 # at least half the specs in the description must also be attributes
+MIN_ATTRIBUTES: int = 3 # a listing needs at least 3 attributes to be compared
+PREMIUM_PRICE: float = 100.0 # from this price, a short description looks suspicious
+MIN_PREMIUM_DESCRIPTION: int = 120 # characters
+MIN_STRUCTURED_SHARE: float = 0.5 # at least half the specs in the description must also be attributes
 
 # "compatible with ..." up to the full stop. "helmet-compatible hood" is a description, not a claim
-Compatibility_pattern: re.Pattern = re.compile(r"\bcompatible\s+with\b[^.]*", re.IGNORECASE)
+COMPATIBILITY_PATTERN: re.Pattern = re.compile(r"\bcompatible\s+with\b[^.]*", re.IGNORECASE)
 # a model name like "Primus 2", a size like "15 in", or a brand in capitals like "MSR"
-Model_pattern: re.Pattern = re.compile(r"\b(?:[A-Z][A-Za-z]+\s?\d|\d+\s?(?:in|mm|cm)|[A-Z]{2,})\b")
-Currency_pattern: re.Pattern = re.compile(r"^[A-Z]{3}$") # EUR, CHF, USD
+MODEL_PATTERN: re.Pattern = re.compile(r"\b(?:[A-Z][A-Za-z]+\s?\d|\d+\s?(?:in|mm|cm)|[A-Z]{2,})\b")
+CURRENCY_PATTERN: re.Pattern = re.compile(r"^[A-Z]{3}$") # EUR, CHF, USD
 
-Min_claims: int = 2 # from 2 marketing words, the description needs as many numbers
-Max_title_length: int = 150 # google merchant center cuts titles after 150 characters
-Min_word_length: int = 4 # shorter words ("of", "and", "for") can repeat in a normal title
-Max_title_commas: int = 3 # "backpack, hiking, camping, travel" is a list of keywords, not a title
-Word_pattern: re.Pattern = re.compile(r"[a-zA-Z]+")
+MIN_CLAIMS: int = 2 # from 2 marketing words, the description needs as many numbers
+MAX_TITLE_LENGTH: int = 150 # google merchant center cuts titles after 150 characters
+MIN_WORD_LENGTH: int = 4 # shorter words ("of", "and", "for") can repeat in a normal title
+MAX_TITLE_COMMAS: int = 3 # "backpack, hiking, camping, travel" is a list of keywords, not a title
+WORD_PATTERN: re.Pattern = re.compile(r"[a-zA-Z]+")
 
-# Points, All_rules and Criterion_of_rule are all built from Rule_registry at the end of this file,
-# so each rule is declared in exactly one place. make_result reads Points when a rule actually runs,
+# POINTS, ALL_RULES and CRITERION_OF_RULE are all built from RULE_REGISTRY at the end of this file,
+# so each rule is declared in exactly one place. make_result reads POINTS when a rule actually runs,
 # which is after the module has finished loading, so defining it below is fine.
 
 
 def make_result(rule: str, passed: bool, message: str) -> RuleResult:
     # full points if the rule passed, 0 otherwise. the message is only kept when it failed
     if passed:
-        return RuleResult(rule, True, Points[rule], "")
+        return RuleResult(rule, True, POINTS[rule], "")
     return RuleResult(rule, False, 0, message)
 
 
 def expected_for(category: str) -> list[str]:
     # the attributes this category must have
     key: str = category.strip().lower()
-    if key in Expected_attributes:
-        return Expected_attributes[key]
-    return Default_expected
+    if key in EXPECTED_ATTRIBUTES:
+        return EXPECTED_ATTRIBUTES[key]
+    return DEFAULT_EXPECTED
 
 
 # criterion 1: distinctive attributes
@@ -68,8 +68,8 @@ def check_expected_attributes(product: Product) -> RuleResult:
 
 def check_attribute_count(product: Product) -> RuleResult:
     found: dict[str, str] = product.attrs()
-    passed: bool = len(found) >= Min_attributes
-    return make_result("attribute_count", passed, f"Fewer than {Min_attributes} structured attributes")
+    passed: bool = len(found) >= MIN_ATTRIBUTES
+    return make_result("attribute_count", passed, f"Fewer than {MIN_ATTRIBUTES} structured attributes")
 
 
 # criterion 2: disambiguation
@@ -84,10 +84,10 @@ def check_units(product: Product) -> RuleResult:
 def check_compatibility(product: Product) -> RuleResult:
     # "compatible with most cartridges" is vague, "compatible with Primus 2" is not
     text: str = product.text()
-    claims: list[str] = Compatibility_pattern.findall(text)
+    claims: list[str] = COMPATIBILITY_PATTERN.findall(text)
     vague: list[str] = []
     for claim in claims:
-        if Model_pattern.search(claim) is None:
+        if MODEL_PATTERN.search(claim) is None:
             vague.append(claim)
     passed: bool = len(vague) == 0
     return make_result("compatibility", passed, "Compatibility claim without a precise list of models")
@@ -96,7 +96,7 @@ def check_compatibility(product: Product) -> RuleResult:
 def check_quantity(product: Product) -> RuleResult:
     # "pack of 2" in the text needs a pack_size attribute
     text: str = product.text()
-    match: re.Match | None = Quantity_phrase.search(text)
+    match: re.Match | None = QUANTITY_PHRASE.search(text)
     found: dict[str, str] = product.attrs()
     passed: bool = match is None or "pack_size" in found
     return make_result("quantity", passed, "Pack mentioned but the " + plain_name("pack_size") + " is missing")
@@ -146,14 +146,14 @@ def check_feed_standard(product: Product) -> RuleResult:
         problems.append("price is missing")
 
     availability: str = product.availability.strip().lower().replace(" ", "_") # "in stock" -> "in_stock"
-    if availability not in Availability_values:
+    if availability not in AVAILABILITY_VALUES:
         problems.append(f"availability '{product.availability}' is not an accepted value")
 
-    if Currency_pattern.match(product.currency) is None:
+    if CURRENCY_PATTERN.match(product.currency) is None:
         problems.append("currency is not a three-letter code")
 
     brand: str = product.brand.strip().lower()
-    if brand == "" or brand in Placeholder_brands:
+    if brand == "" or brand in PLACEHOLDER_BRANDS:
         problems.append("brand is empty or a placeholder")
 
     passed: bool = len(problems) == 0
@@ -164,10 +164,10 @@ def check_feed_standard(product: Product) -> RuleResult:
 
 def check_price_coherence(product: Product) -> RuleResult:
     # an expensive product with a very short description is not credible
-    if product.price is None or product.price < Premium_price:
+    if product.price is None or product.price < PREMIUM_PRICE:
         return make_result("price_coherence", True, "")
-    passed: bool = len(product.description) >= Min_premium_description
-    return make_result("price_coherence", passed, f"Premium price but description shorter than {Min_premium_description} characters")
+    passed: bool = len(product.description) >= MIN_PREMIUM_DESCRIPTION
+    return make_result("price_coherence", passed, f"Premium price but description shorter than {MIN_PREMIUM_DESCRIPTION} characters")
 
 
 def text_conflicts(text: str, found: dict[str, str], where: str) -> list[str]:
@@ -178,8 +178,8 @@ def text_conflicts(text: str, found: dict[str, str], where: str) -> list[str]:
         # attributes of this listing that use the same unit
         # a sleeping bag has three in °C (comfort, limit, extreme), so the text only has to agree with one
         same_unit: list[str] = []
-        for key in Unit_of_key:
-            if Unit_of_key[key] == unit and key in found:
+        for key in UNIT_OF_KEY:
+            if UNIT_OF_KEY[key] == unit and key in found:
                 same_unit.append(key)
         if len(same_unit) == 0:
             continue # no attribute to compare with
@@ -221,20 +221,20 @@ def check_plausible_values(product: Product) -> RuleResult:
     problems: list[str] = []
 
     # 1. each number inside its usual range
-    for key in Plausible_ranges:
+    for key in PLAUSIBLE_RANGES:
         if key not in found:
             continue
         number: float | None = to_number(found[key])
         if number is None:
             problems.append(f"{plain_name(key)} should be a number, not '{found[key]}'")
             continue
-        lowest: int = Plausible_ranges[key][0]
-        highest: int = Plausible_ranges[key][1]
+        lowest: int = PLAUSIBLE_RANGES[key][0]
+        highest: int = PLAUSIBLE_RANGES[key][1]
         if number < lowest or number > highest:
             problems.append(f"{plain_name(key)} is {found[key]}, outside the usual range ({lowest} to {highest})")
 
     # 2. temperatures that must go down: comfort > limit > extreme
-    for group in Decreasing_attributes:
+    for group in DECREASING_ATTRIBUTES:
         previous_key: str = ""
         previous_number: float | None = None
         for key in group:
@@ -282,7 +282,7 @@ def structured_share(product: Product) -> float:
 
 def check_structured_share(product: Product) -> RuleResult:
     share: float = structured_share(product)
-    passed: bool = share >= Min_structured_share
+    passed: bool = share >= MIN_STRUCTURED_SHARE
     return make_result("structured_share", passed, "Specifications live in the description instead of structured attributes")
 
 
@@ -292,7 +292,7 @@ def marketing_words_in(text: str) -> list[str]:
     # the marketing words found in the text, e.g. ["premium", "ultimate"]
     found: list[str] = []
     lowered: str = text.lower()
-    for word in Marketing_words:
+    for word in MARKETING_WORDS:
         # \b = word boundary, so "best" is not found inside "bestseller"
         if re.search(r"\b" + re.escape(word) + r"\b", lowered) is not None:
             found.append(word)
@@ -304,7 +304,7 @@ def check_facts_not_claims(product: Product) -> RuleResult:
     text: str = product.text()
     claims: list[str] = marketing_words_in(text)
     facts: int = len(specs_in_text(text))
-    passed: bool = len(claims) < Min_claims or facts >= len(claims)
+    passed: bool = len(claims) < MIN_CLAIMS or facts >= len(claims)
     return make_result("facts_not_claims", passed, f"Marketing words instead of facts: {', '.join(claims[:4])}")
 
 
@@ -313,8 +313,8 @@ def check_keyword_stuffing(product: Product) -> RuleResult:
     problems: list[str] = []
 
     counts: dict[str, int] = {}
-    for word in Word_pattern.findall(product.title.lower()):
-        if len(word) < Min_word_length:
+    for word in WORD_PATTERN.findall(product.title.lower()):
+        if len(word) < MIN_WORD_LENGTH:
             continue
         if word in counts:
             counts[word] = counts[word] + 1
@@ -327,11 +327,11 @@ def check_keyword_stuffing(product: Product) -> RuleResult:
     if len(repeated) > 0:
         problems.append(f"repeated in the title: {', '.join(repeated)}")
 
-    if product.title.count(",") >= Max_title_commas:
+    if product.title.count(",") >= MAX_TITLE_COMMAS:
         problems.append("the title is a list of keywords")
 
-    if len(product.title) > Max_title_length:
-        problems.append(f"the title is longer than {Max_title_length} characters")
+    if len(product.title) > MAX_TITLE_LENGTH:
+        problems.append(f"the title is longer than {MAX_TITLE_LENGTH} characters")
 
     passed: bool = len(problems) == 0
     return make_result("keyword_stuffing", passed, "Keyword stuffing: " + "; ".join(problems))
@@ -348,22 +348,22 @@ def first_sentence(text: str) -> str:
 def check_clear_opening(product: Product) -> RuleResult:
     # the first sentence must say what the product is: "Hiking daypack with...", not "Adventure awaits!"
     key: str = product.category.strip().lower()
-    if key not in Category_words:
+    if key not in CATEGORY_WORDS:
         return make_result("clear_opening", True, "") # unknown category, nothing to compare with
 
     opening: str = first_sentence(product.description).lower()
     names_it: bool = False
-    for word in Category_words[key]:
+    for word in CATEGORY_WORDS[key]:
         if re.search(r"\b" + re.escape(word) + r"\b", opening) is not None:
             names_it = True
-    return make_result("clear_opening", names_it, f"The first sentence does not say what the product is (e.g. {Category_words[key][0]})")
+    return make_result("clear_opening", names_it, f"The first sentence does not say what the product is (e.g. {CATEGORY_WORDS[key][0]})")
 
 
 # the one place a rule is declared: its function, its points, and the criterion it scores.
 # to add a rule: write the check_ function above, then add one line here. nothing else to keep in sync.
 # the rule name used everywhere else is the function name without "check_" (check_gtin -> "gtin").
-# total points = 100, split across the five criteria (see report.Criteria).
-Rule_registry: list[tuple] = [
+# total points = 100, split across the five criteria (see report.CRITERIA).
+RULE_REGISTRY: list[tuple] = [
     (check_expected_attributes, 17, "Distinctive attributes"),
     (check_attribute_count, 4, "Distinctive attributes"),
     (check_units, 10, "Disambiguation"),
@@ -387,6 +387,6 @@ def rule_name(check_function) -> str:
 
 
 # derived from the registry, so these three can never drift apart
-All_rules: list = [entry[0] for entry in Rule_registry] # the functions, in run order
-Points: dict[str, int] = {rule_name(entry[0]): entry[1] for entry in Rule_registry}
-Criterion_of_rule: dict[str, str] = {rule_name(entry[0]): entry[2] for entry in Rule_registry}
+ALL_RULES: list = [entry[0] for entry in RULE_REGISTRY] # the functions, in run order
+POINTS: dict[str, int] = {rule_name(entry[0]): entry[1] for entry in RULE_REGISTRY}
+CRITERION_OF_RULE: dict[str, str] = {rule_name(entry[0]): entry[2] for entry in RULE_REGISTRY}

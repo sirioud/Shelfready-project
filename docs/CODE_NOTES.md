@@ -60,15 +60,15 @@ What the codebase does well:
   `scoring` aggregates, `report` formats, `questions` matches shopper intent,
   `sector` holds domain data, `models` holds the two data classes.
 - **Typed signatures and variables** throughout.
-- **No duplicated logic** — shared constants (e.g. `Quantity_phrase`,
-  `Criteria`) live in one module and are imported, not copied.
+- **No duplicated logic** — shared constants (e.g. `QUANTITY_PHRASE`,
+  `CRITERIA`) live in one module and are imported, not copied.
 - **Defensive loader** — the two-level error handling above; nothing trusts
   the input file.
 - **Escaped HTML** in the report (`escape(...)`) — no injection from product
   text.
 - **Naive, readable style on purpose** — explicit loops over comprehensions
   and lambdas, matching the course convention.
-- **`Capitalized_case` constants**, lowercase locals — consistent naming.
+- **`UPPER_CASE` constants** (PEP 8), lowercase locals — consistent naming.
 - **`AuditResult`** bundles everything one audit produces, so results travel
   as a single value; `main()` is pure orchestration and every `show_*`
   function takes that one object.
@@ -91,30 +91,30 @@ Two structural improvements from the code review, now applied.
 
 ### 1. One source of truth for rule registration
 
-**Before:** a rule's identity was spread across three structures — `All_rules`
-(the run list) and `Points` (`rules.py`), plus `Criterion_of_rule`
+**Before:** a rule's identity was spread across three structures — `ALL_RULES`
+(the run list) and `POINTS` (`rules.py`), plus `CRITERION_OF_RULE`
 (`report.py`). Adding or renaming a rule meant editing all three in two files;
 forgetting one gave a silent wrong total or a runtime `KeyError`.
 
-**After:** a single `Rule_registry` in `rules.py` holds, per rule, its
-function, its points, and its criterion. `All_rules`, `Points`, and
-`Criterion_of_rule` are **derived** from it, so they cannot drift apart.
-`report.py` now imports `Criterion_of_rule` instead of keeping its own copy.
+**After:** a single `RULE_REGISTRY` in `rules.py` holds, per rule, its
+function, its points, and its criterion. `ALL_RULES`, `POINTS`, and
+`CRITERION_OF_RULE` are **derived** from it, so they cannot drift apart.
+`report.py` now imports `CRITERION_OF_RULE` instead of keeping its own copy.
 
 ```python
-Rule_registry: list[tuple] = [
+RULE_REGISTRY: list[tuple] = [
     (check_expected_attributes, 17, "Distinctive attributes"),
     (check_gtin, 8, "Disambiguation"),
     ...
 ]
-All_rules = [entry[0] for entry in Rule_registry]
-Points = {rule_name(entry[0]): entry[1] for entry in Rule_registry}
-Criterion_of_rule = {rule_name(entry[0]): entry[2] for entry in Rule_registry}
+ALL_RULES = [entry[0] for entry in RULE_REGISTRY]
+POINTS = {rule_name(entry[0]): entry[1] for entry in RULE_REGISTRY}
+CRITERION_OF_RULE = {rule_name(entry[0]): entry[2] for entry in RULE_REGISTRY}
 ```
 
 Adding a rule is now: write the `check_` function, add **one line** to the
-registry. The three presentation dicts in `report.py` (`Rule_names`,
-`How_to_fix`, `Basis_of_rule`) are UI copy and stay there; a test already
+registry. The three presentation dicts in `report.py` (`RULE_NAMES`,
+`HOW_TO_FIX`, `BASIS_OF_RULE`) are UI copy and stay there; a test already
 checks they cover every registered rule.
 
 ### 2. Parse each product's attributes once
@@ -133,8 +133,8 @@ The same string was parsed a dozen-plus times per product.
 directly. Clearer call sites and the parsing work happens once per product.
 
 **Verification:** full suite green — `Ran 94 tests ... OK (skipped=2)` (the two
-skips are the Streamlit-only app tests). Points still sum to 100, `All_rules`
-names equal `Points` keys, `report` shares the one criterion map, and
+skips are the Streamlit-only app tests). Points still sum to 100, `ALL_RULES`
+names equal `POINTS` keys, `report` shares the one criterion map, and
 `attrs()` returns the same cached object on repeat calls.
 
 ### Still open (not implemented)
@@ -143,7 +143,7 @@ names equal `Points` keys, `report` shares the one criterion map, and
   `check_keyword_stuffing`, `count_ready`) with `collections.Counter` /
   `sum(...)` — deferred to keep the course's naive style.
 - Cache `unanswered_questions` on `ProductScore` (computed 3–4 times today).
-- Tighten loose types: `All_rules` -> `list[Callable[[Product], RuleResult]]`;
+- Tighten loose types: `ALL_RULES` -> `list[Callable[[Product], RuleResult]]`;
   `TypedDict` for report/row dict shapes.
 
 ## Tests
