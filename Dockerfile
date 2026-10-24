@@ -15,6 +15,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY shelfready_app.py ./
 COPY shelfready shelfready/
 
+# Safer settings for the online version (running locally keeps streamlit's defaults)
+# - uploads up to 5 MB: the default 200 MB could use all the memory of the server
+# - visitors only see a short error message, the full error stays in the server logs
+# - no usage statistics sent to streamlit
+ENV STREAMLIT_SERVER_MAX_UPLOAD_SIZE=5 \
+    STREAMLIT_CLIENT_SHOW_ERROR_DETAILS=none \
+    STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+
+# Run as a normal user, not root, so the app cannot change its own files or the system
+RUN useradd --create-home shelfready
+USER shelfready
+
 EXPOSE 8501
 
 # Render gives the port in $PORT; 8501 is used when running locally
