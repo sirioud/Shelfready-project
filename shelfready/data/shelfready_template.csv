@@ -1,2 +1,0 @@
-id,category,title,description,price,currency,availability,gtin,brand,image_url,attributes
-P001,backpack,Trail daypack 30 l,Hiking daypack with a rain cover. Holds 30 l and weighs 900 g.,89.00,EUR,in_stock,4006381333931,Nordwear,https://example.com/p001.jpg,volume_l: 30 | weight_g: 900 | material: nylon

@@ -57,10 +57,7 @@ The page is deployed on Render (free plan) as a Docker container built from the
 docs are not copied into the image. Render's health check calls
 `/_stcore/health`.
 
-
-## 
-
-The CSV file
+## The CSV file
 
 | Column | Needed | Example |
 |---|---|---|

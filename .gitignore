@@ -1,3 +1,9 @@
 __pycache__/
 .venv/
 shelfready/reports/
+
+# files saved from the web page download buttons
+shelfready_ai_feed.tsv
+shelfready_template.csv
+shelfready_report.html
+shelfready_results.json

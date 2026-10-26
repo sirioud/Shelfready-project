@@ -1,9 +1,0 @@
-id	product_highlight	question_and_answer
-P001	"Volume: 30 l", "Weight: 900 g", "Material: nylon"	"Is it big enough for a weekend (30 l or more)?":"Yes, volume is 30 l.", "Does it weigh less than 1 kg?":"Yes, weight is 900 g."
-P002	"Comfort temperature: 0 °C", "Weight: 1100 g", "Material: down"	"Does it weigh less than 1.5 kg?":"Yes, weight is 1100 g."
-P004	"Size: 42", "Size system: EU", "Colour: black", "Gender: unisex", "Age group: adult"	"Is it EU size 42?":"Yes, size is 42.", "Is it unisex?":"Yes, gender is unisex."
-P005	"Power: 3000 W", "Material: steel"	
-P006	"Size: 39-42", "Size system: EU", "Colour: grey", "Gender: unisex", "Age group: adult"	
-P007	"Capacity: 750 ml", "Weight: 150 g", "Material: titanium"	"Does it hold 750 ml or more?":"Yes, capacity is 750 ml.", "Does it weigh less than 200 g?":"Yes, weight is 150 g."
-P010	"Material: aluminium", "Weight: 60 g", "Colour: orange"	
-P012	"Capacity: 500 ml", "Weight: 45 g", "Material: silicone"	"Does it hold 750 ml or more?":"No, capacity is 500 ml.", "Does it weigh less than 200 g?":"Yes, weight is 45 g."
