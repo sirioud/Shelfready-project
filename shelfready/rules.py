@@ -1,5 +1,5 @@
 #The fourteen AI-readability rules.
-#Every rule takes one Product and gives back one RuleResult."""
+#Every rule takes one Product and gives back one RuleResult.
 
 import re
 

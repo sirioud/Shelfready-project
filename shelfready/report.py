@@ -1,4 +1,4 @@
-#The two reports: text for the terminal and an html page for the browser."""
+#The two reports: text for the terminal and an html page for the browser.
 
 from datetime import date
 from html import escape

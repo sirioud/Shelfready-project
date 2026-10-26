@@ -3,7 +3,7 @@
 #- product_highlight: the specs as short facts, e.g. "Volume: 30 l"
 #- question_and_answer: the shopper questions this listing can answer, e.g. "Is it warm enough for a night at -5 °C?"
 #Nothing is invented: every value comes from the attributes column. No AI is used.
-#The file is tab separated (TSV), so a comma inside a value cannot split it."""
+#The file is tab separated (TSV), so a comma inside a value cannot split it.
 
 from pathlib import Path
 

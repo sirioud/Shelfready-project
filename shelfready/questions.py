@@ -1,6 +1,6 @@
 #Shopper questions (list in sector.py), e.g. "a sleeping bag for a night at -5 °C".
 #For each listing: yes, no, or unknown when the attribute is missing.
-#Unknown = the assistant can never show the listing for that question. Not part of the score."""
+#Unknown = the assistant can never show the listing for that question. Not part of the score.
 
 from .attributes import plain_name, to_number
 from .models import Product
