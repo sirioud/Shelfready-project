@@ -1,6 +1,6 @@
-#Data model for ShelfReady.
-#Product = one row of the shop's csv file
-#RuleResult = the result of one check on one product
+# Data model for ShelfReady.
+# Product = one row of the shop's csv file
+# RuleResult = the result of one check on one product
 
 from .attributes import parse_attributes
 
@@ -48,7 +48,7 @@ class Product:
     def __repr__(self) -> str:
         return f"Product(id='{self.id}', category='{self.category}', title='{self.title}')"
 
-#TODO: add a __str__() that prints all fields, for debugging and check functions
+# TODO: add a __str__() that prints all fields, for debugging and check functions
 
 class RuleResult:
     def __init__(self, rule: str, passed: bool, points: int, message: str = ""):

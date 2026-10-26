@@ -101,7 +101,7 @@ class LoaderTests(unittest.TestCase):
         self.assertIsNone(parse_price(""))
 
     def test_parse_price_refuses_nan_and_inf(self):
-        #float accepts "nan" and "inf", but we don't want them in a price
+        # float accepts "nan" and "inf", but we don't want them in a price
         self.assertRaises(ValueError, parse_price, "nan")
         self.assertRaises(ValueError, parse_price, "inf")
 

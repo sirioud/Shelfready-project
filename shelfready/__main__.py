@@ -1,4 +1,4 @@
-#Command line: python -m shelfready audit FILE.csv [--html PATH] [--feed PATH]
+# Command line: python -m shelfready audit FILE.csv [--html PATH] [--feed PATH]
 
 import argparse
 import sys

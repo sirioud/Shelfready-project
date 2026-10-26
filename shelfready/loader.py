@@ -1,6 +1,6 @@
-#The loader reads the product csv file and turns each row into a Product object.
-#It stops if the whole file is unusable (file missing, required columns missing).
-#If only one row is bad (no id, price is not a number) it skips that row, notes it and continues.
+# The loader reads the product csv file and turns each row into a Product object.
+# It stops if the whole file is unusable (file missing, required columns missing).
+# If only one row is bad (no id, price is not a number) it skips that row, notes it and continues.
 
 import csv
 import io
