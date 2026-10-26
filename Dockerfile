@@ -12,7 +12,7 @@ COPY ${REQUIREMENTS} ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the app and its package (code + sample data)
-COPY shelfready_app.py ./
+COPY shelfready_app.py shelfready_server.py ./
 COPY shelfready shelfready/
 
 # Safer settings for the online version (running locally keeps streamlit's defaults)
@@ -30,4 +30,5 @@ USER shelfready
 EXPOSE 8501
 
 # Render gives the port in $PORT; 8501 is used when running locally
-CMD ["sh", "-c", "exec streamlit run shelfready_app.py --server.address 0.0.0.0 --server.port ${PORT:-8501} --server.headless true"]
+# shelfready_server.py runs shelfready_app.py and hides the /_stcore/metrics page
+CMD ["sh", "-c", "exec streamlit run shelfready_server.py --server.address 0.0.0.0 --server.port ${PORT:-8501} --server.headless true"]
