@@ -21,8 +21,9 @@ CSV file.
 
 There are two ways to use it, with the same checks and the same scores:
 
-- a web page made with Streamlit, online at https://shelfready-project.onrender.com
-- a command line tool: `python -m shelfready audit FILE.csv`
+1. a web page made with Streamlit, online at https://shelfready-project.onrender.com
+
+2. a command line tool: `python -m shelfready audit FILE.csv`
 
 Both can also export an AI-ready feed for Google Merchant Center (see below).
 
@@ -49,59 +50,12 @@ nomades_project/
     ├── report.py             terminal, HTML and JSON reports
     └── data/                 sample_products.csv, test_shop.csv
 ```
-
-## Running the web page
-
-In the course container (conda environment `nomades_nppd_312`):
-
-```bash
-conda activate nomades_nppd_312
-streamlit run shelfready_app.py
-```
-
-Elsewhere, install Streamlit first with `pip install -r requirements.txt`.
-Then open http://localhost:8501, upload a CSV or tick "Try the sample outdoor
-shop instead".
-
-The page has four tabs. Overview shows the catalog score, the score per
-criterion and the three most common problems. Listings shows every listing
-from worst to best, marked Ready, To fix or Blocked, with what to change.
-Shopper questions shows which listings match typical requests. Download gives
-the HTML report, the results as JSON and the AI-ready feed.
-
-The page only displays results. The checks are done by the `shelfready`
-package, the same code as the command line.
-
 ## Online version
 
 The page is deployed on Render (free plan) as a Docker container built from the
 `Dockerfile`: Python 3.12 slim, Streamlit, the app and the package. Tests and
 docs are not copied into the image. Render's health check calls
 `/_stcore/health`.
-
-To run the same image on your own computer:
-
-```bash
-docker build -t shelfready .
-docker run -p 8501:8501 shelfready
-```
-
-A bigger image with the whole course environment is on Docker Hub as
-`sirioud/shelfready:full`.
-
-## Command line
-
-From the root of the repository:
-
-```bash
-python -m shelfready audit shelfready/data/sample_products.csv
-python -m shelfready audit shelfready/data/sample_products.csv --html shelfready/reports/report.html
-python -m shelfready audit shelfready/data/sample_products.csv --feed shelfready/reports/ai_feed.tsv
-```
-
-`audit` prints the catalog score, the most common problems and one line per
-listing. `--html` also writes a report for the browser, and `--feed` writes the
-AI-ready feed.
 
 ## The CSV file
 
@@ -205,3 +159,5 @@ runtime are only written in the description.
 ShelfReady does not read Shopify or XML exports directly, check the live
 product page, or use Google's own attribute weights, which some of these tools
 do.
+
+

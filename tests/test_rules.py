@@ -70,6 +70,9 @@ class RuleTests(unittest.TestCase):
         self.assertFalse(rules.check_feed_standard(good_product(title="")).passed)
         self.assertFalse(rules.check_feed_standard(good_product(price=None)).passed)
 
+    def test_feed_standard_needs_an_image(self):
+        self.assertFalse(rules.check_feed_standard(good_product(image_url="")).passed)
+
     def test_compatibility_needs_with(self):
         # "helmet-compatible hood" describes the hood, it is not a compatibility claim
         jacket: Product = good_product(description="Rain jacket with a helmet-compatible hood.")

@@ -78,3 +78,5 @@ def question_summary(products: list[Product]) -> list[dict]:
                     unknown.append(product.id)
             summary.append({"question": question[0], "matches": matches, "unknown": unknown})
     return summary
+
+#TODO: add a function that returns the questions that cannot be answered for the whole catalog, e.g. ["A sleeping bag for a night at -5 °C: needs the limit temperature in °C (limit_c)"]
