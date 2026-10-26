@@ -4,6 +4,7 @@
 
 import csv
 import io
+import math
 from pathlib import Path
 
 from .models import Product
@@ -36,7 +37,10 @@ def parse_price(raw: str | None) -> float | None:
         text = text[:-2] # 89.- becomes 89
 
     text = text.replace(",", ".") # decimal comma becomes a decimal point
-    return float(text) # if it is still not a number -> ValueError
+    price: float = float(text)
+    if math.isnan(price) or math.isinf(price):
+        raise ValueError("price is not a number")
+    return price
 
 
 def clean_cell(row: dict, column: str) -> str:
@@ -79,13 +83,16 @@ def load_products_from_text(text: str) -> tuple[list[Product], list[str]]:
     errors: list[str] = []
     line_of_id: dict[str, int] = {} # remembers on which line each id was first seen
 
-    # io.StringIO makes the text behave like an open file, so csv can read it
-    reader: csv.DictReader = csv.DictReader(io.StringIO(text, newline=""))
+    first_line: str = text.splitlines()[0] if text else ""
+    delimiter: str = ";" if ";" in first_line else "," # some shops export semicolon
+    reader: csv.DictReader = csv.DictReader(io.StringIO(text), delimiter=delimiter)
 
-    # check the header row first
-    header: list[str] = []
+    header:list[str] = []
     if reader.fieldnames is not None:
-        header = list(reader.fieldnames)
+        for name in reader.fieldnames:
+            header.append(name.strip().lower()) # ignore capitals and spaces in the header
+    reader.fieldnames = header # the DictReader will use the cleaned names
+
     missing: list[str] = []
     for column in REQUIRED_COLUMNS:
         if column not in header:

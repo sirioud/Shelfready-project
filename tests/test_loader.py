@@ -86,9 +86,24 @@ class LoaderTests(unittest.TestCase):
         with self.assertRaises(LoaderError):
             load_products(self.folder / "nothing.csv")
 
+    def test_reads_semicolon_csv(self):
+        products, errors = load_products_from_text(HEADER.replace(",", ";") + "P1;mug;Mug;;12;EUR;;;;;\n")
+        self.assertEqual(products[0].id, "P1")
+        self.assertEqual(errors, [])
+    
+    def test_header_ignores_capitals_and_spaces(self):
+        products, errors = load_products_from_text("ID , Category , Title , Description , Price , Currency , Availability , GTIN , Brand , Image URL , Attributes\n" + "P1,mug,Mug,,12,EUR,,,,,\n")
+        self.assertEqual(products[0].id, "P1")
+        self.assertEqual(errors, [])    
+
     def test_parse_price_accepts_comma(self):
         self.assertEqual(parse_price("12,50"), 12.5)
         self.assertIsNone(parse_price(""))
+
+    def test_parse_price_refuses_nan_and_inf(self):
+        #float accepts "nan" and "inf", but we don't want them in a price
+        self.assertRaises(ValueError, parse_price, "nan")
+        self.assertRaises(ValueError, parse_price, "inf")
 
     def test_parse_price_swiss_formats(self):
         self.assertEqual(parse_price("1'299.00"), 1299.0)

@@ -48,6 +48,7 @@ class Product:
     def __repr__(self) -> str:
         return f"Product(id='{self.id}', category='{self.category}', title='{self.title}')"
 
+#TODO: add a __str__() that prints all fields, for debugging and check functions
 
 class RuleResult:
     def __init__(self, rule: str, passed: bool, points: int, message: str = ""):
@@ -58,3 +59,5 @@ class RuleResult:
 
     def __repr__(self) -> str:
         return f"RuleResult(rule='{self.rule}', passed={self.passed}, points={self.points})"
+
+

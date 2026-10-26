@@ -37,7 +37,7 @@ HOW_TO_FIX: dict[str, str] = {
     "compatibility": "Name the exact models it works with instead of 'most' or 'all'.",
     "quantity": "Add pack_size: 2 (or the right number) to the attributes.",
     "gtin": "Copy the barcode from the box. The last digit is a check digit, so one typo makes it invalid.",
-    "feed_standard": "Fill in the title and price, use in_stock / out_of_stock / preorder / backorder, and give a real brand.",
+    "feed_standard": "Fill in the title and price and image_url, use in_stock / out_of_stock / preorder / backorder, and give a real brand.",
     "price_coherence": "Write a longer description: an expensive product needs at least 120 characters.",
     "spec_agreement": "Make the title, the description and the attributes say the same number.",
     "plausible_values": "Check the value and its unit: weight_g is in grams, temperatures go comfort > limit > extreme.",
@@ -304,3 +304,4 @@ def json_report(scores: list[ProductScore], catalog_score: float, errors: list[s
         "products": products,
         "skipped_rows": errors,
     }
+
