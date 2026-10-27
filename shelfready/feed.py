@@ -5,8 +5,6 @@
 # Nothing is invented: every value comes from the attributes column. No AI is used.
 # The file is tab separated (TSV), so a comma inside a value cannot split it.
 
-from pathlib import Path
-
 from .attributes import UNIT_OF_KEY, to_number
 from .models import Product
 from .questions import NO, YES, answer_question, questions_for
@@ -114,9 +112,3 @@ def supplemental_feed(products: list[Product]) -> str:
         lines.append("\t".join(row))
     return "\n".join(lines) + "\n"
 
-
-def write_supplemental_feed(path: str | Path, products: list[Product]) -> Path:
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(supplemental_feed(products), encoding="utf-8")
-    return path

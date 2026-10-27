@@ -87,5 +87,5 @@ for a demo, restore it with:
 git checkout shelfready/data/sample_products.csv
 ```
 
-Otherwise `test_cli.py` and `test_app.py`, which assert the catalog score of
-85.3 and 5 of 10, will fail.
+Otherwise `test_app.py`, which asserts the catalog score of 85.3 and 5 of 10,
+will fail.
