@@ -14,7 +14,7 @@ conda activate nomades_nppd_312                  # environment with Streamlit
 python -m unittest                               # all tests
 python -m unittest -v                            # one line per test, with its name
 python -m unittest tests.test_scoring # one file only
-python -m unittest tests.test_scoring.ScoringTests.test_catalog_average  # one test only
+python -m unittest tests.test_scoring.ScoringTests.test_perfect_product_scores_100  # one test only
 ```
 
 In VS Code, the tests also appear in the **Testing** panel (flask icon in the
@@ -23,9 +23,9 @@ side bar). `.vscode/settings.json` already configures it.
 ### Reading the result
 
 ```
-ss..................................................................
+ss...........
 ----------------------------------------------------------------------
-Ran 94 tests in 0.032s
+Ran 13 tests in 0.010s
 
 OK (skipped=2)
 ```
@@ -89,24 +89,20 @@ exactly one cause.
 
 ## What is tested
 
-The tests are in `tests/`. There is one test file per module.
+The tests are in `tests/`. Only the core of the app is tested: one or two
+tests for each important part.
 
 | File | Tests | Module tested | What it checks |
 |---|---|---|---|
-| `test_rules.py` | 34 | `rules.py` | Each rule (GTIN, brand, specs, marketing words, keyword stuffing, ...) on good and broken listings |
-| `test_loader.py` | 13 | `loader.py` | Reading CSV files: missing columns, invalid prices, skipped rows |
-| `test_attributes.py` | 11 | `attributes.py` | Reading specs such as `volume_l: 30 \| weight_g: 900` |
-| `test_scoring.py` | 8 | `scoring.py` | Listing score, catalog average, "ready" and "blocked" listings |
-| `test_report.py` | 8 | `report.py` | The HTML and JSON reports |
-| `test_cli.py` | 5 | `__main__.py` | The `python -m shelfready audit` command, with `--html` and `--feed` |
-| `test_questions.py` | 4 | `questions.py` | Which shopper questions a listing can answer |
-| `test_app.py` | 2 | `shelfready_app.py` | The Streamlit web page |
-| `test_feed.py` | 9 | `feed.py` | The AI-ready feed: highlights, questions and answers, file format, listings left out |
-| **Total** | **94** | | |
+| `test_loader.py` | 4 | `loader.py` | A missing column stops the file (`LoaderError`); a bad price skips only its row; Swiss prices (`1'299.00`, `89.-`, `1 299,50`); `nan` and `inf` refused |
+| `test_rules.py` | 3 | `rules.py` | GTIN check digit (valid codes, wrong last digit); the rule points add up to 100 |
+| `test_scoring.py` | 3 | `scoring.py` | A perfect listing scores 100; a broken one loses points for the right rules; a blocked listing is not ready even at 90 |
+| `test_report.py` | 1 | `report.py` | Text from the shop's file is escaped in the HTML report |
+| `test_app.py` | 2 | `shelfready_app.py` | The web page starts, and the sample shop gives 85.3 / 100, 5 of 10 ready and the 2 skipped rows |
+| **Total** | **13** | | |
 
-Tests that need a file (CSV input, HTML report) create it in a temporary
-folder with `tempfile`, so running the tests never changes the files in
-`shelfready/data/`.
+The tests give the CSV to the loader as text, so running the tests never
+changes the files in `shelfready/data/`.
 
 ## Skipped tests
 
@@ -118,7 +114,7 @@ not failed:
 @unittest.skipUnless(Has_streamlit, "streamlit is not installed in this environment")
 ```
 
-Run the tests in `nomades_nppd_312` to see all 94 pass.
+Run the tests in `nomades_nppd_312` to see all 13 pass.
 
 ## Adding a test
 

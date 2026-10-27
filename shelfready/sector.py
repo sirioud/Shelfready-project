@@ -1,5 +1,5 @@
-#Knowledge about the industry, kept as plain data. Sector: outdoor and sport gear.
-#To audit another sector, change this file and the sample csv. The rules do not change."""
+# Knowledge about the industry, kept as plain data. Sector: outdoor and sport gear.
+# To audit another sector, change this file and the sample csv. The rules do not change.
 
 SECTOR: str = "Outdoor and sport gear"
 

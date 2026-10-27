@@ -1,4 +1,4 @@
-#Runs every rule on each product and adds up the points."""
+# Runs every rule on each product and adds up the points.
 
 from .models import Product, RuleResult
 from .questions import unanswered_questions

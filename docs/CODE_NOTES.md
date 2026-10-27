@@ -12,15 +12,11 @@ A custom exception (`loader.py`) raised when nothing can be scored:
 
 - **Bad encoding** — tries UTF-8, then latin-1, otherwise raises
   "save it as CSV UTF-8 and try again".
-- **File not found / not a file** (e.g. a folder was passed).
 - **Missing required columns** — `id`, `title`, `price`.
 
-It is caught in exactly the two entry points:
-
-| Entry point | Location | What the user sees |
-|---|---|---|
-| CLI | `__main__.py` | `Error: …` printed to **stderr**, non-zero exit |
-| Web | `shelfready_app.py` (`load_input`) | `st.error("This file cannot be read. …")`, returns `None` |
+It is caught in one place, the web page (`shelfready_app.py`, `load_input`):
+the user sees `st.error("This file cannot be read. …")` and the function
+returns `None`.
 
 ### 2. Row-level errors — skip the row, keep going
 
@@ -148,5 +144,5 @@ names equal `POINTS` keys, `report` shares the one criterion map, and
 
 ## Tests
 
-94 tests (`unittest`), all passing (2 Streamlit-only app tests skipped when
+13 tests (`unittest`), all passing (2 Streamlit-only app tests skipped when
 Streamlit is absent).

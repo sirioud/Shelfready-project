@@ -1,11 +1,9 @@
-#AI-ready feed: a google merchant center supplemental feed made from the shop's own data.
-#Two "conversational attributes" that AI Mode and Gemini read:
-#- product_highlight: the specs as short facts, e.g. "Volume: 30 l"
-#- question_and_answer: the shopper questions this listing can answer, e.g. "Is it warm enough for a night at -5 °C?"
-#Nothing is invented: every value comes from the attributes column. No AI is used.
-#The file is tab separated (TSV), so a comma inside a value cannot split it."""
-
-from pathlib import Path
+# AI-ready feed: a google merchant center supplemental feed made from the shop's own data.
+# Two "conversational attributes" that AI Mode and Gemini read:
+# - product_highlight: the specs as short facts, e.g. "Volume: 30 l"
+# - question_and_answer: the shopper questions this listing can answer, e.g. "Is it warm enough for a night at -5 °C?"
+# Nothing is invented: every value comes from the attributes column. No AI is used.
+# The file is tab separated (TSV), so a comma inside a value cannot split it.
 
 from .attributes import UNIT_OF_KEY, to_number
 from .models import Product
@@ -114,9 +112,3 @@ def supplemental_feed(products: list[Product]) -> str:
         lines.append("\t".join(row))
     return "\n".join(lines) + "\n"
 
-
-def write_supplemental_feed(path: str | Path, products: list[Product]) -> Path:
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(supplemental_feed(products), encoding="utf-8")
-    return path

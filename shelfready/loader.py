@@ -1,11 +1,10 @@
-#The loader reads the product csv file and turns each row into a Product object.
-#It stops if the whole file is unusable (file missing, required columns missing).
-#If only one row is bad (no id, price is not a number) it skips that row, notes it and continues."""
+# The loader reads the product csv file and turns each row into a Product object.
+# It stops if the whole file is unusable (unreadable encoding, required columns missing).
+# If only one row is bad (no id, price is not a number) it skips that row, notes it and continues.
 
 import csv
 import io
 import math
-from pathlib import Path
 
 from .models import Product
 
@@ -65,20 +64,8 @@ def decode_bytes(data: bytes, name: str) -> str:
         raise LoaderError(f"Cannot read {name}: save it as CSV UTF-8 and try again")
 
 
-def load_products(path: str | Path) -> tuple[list[Product], list[str]]:
-    # used by the command line: reads a file from the disk
-    path = Path(path)
-    if not path.exists():
-        raise LoaderError(f"File not found: {path}")
-    if not path.is_file():
-        raise LoaderError(f"Not a file: {path}") # e.g. a folder
-
-    text: str = decode_bytes(path.read_bytes(), str(path))
-    return load_products_from_text(text)
-
-
 def load_products_from_text(text: str) -> tuple[list[Product], list[str]]:
-    # used by the web page: an uploaded file has no path
+    # the web page gives the file as text: an uploaded file has no path
     products: list[Product] = []
     errors: list[str] = []
     line_of_id: dict[str, int] = {} # remembers on which line each id was first seen

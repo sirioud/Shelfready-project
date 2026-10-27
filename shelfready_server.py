@@ -1,7 +1,7 @@
-#ShelfReady online version: the same web page as shelfready_app.py, with one extra check in front.
-#Streamlit has a public /_stcore/metrics page (visitor counts) that cannot be switched off in its settings,
-#so a small "middleware" looks at every request first and answers "not found" for that page.
-#Used by the Dockerfile (Render). Locally, streamlit run shelfready_app.py still works as before.
+# ShelfReady online version: the same web page as shelfready_app.py, with one extra check in front.
+# Streamlit has a public /_stcore/metrics page (visitor counts) that cannot be switched off in its settings,
+# so a small "middleware" looks at every request first and answers "not found" for that page.
+# Used by the Dockerfile (Render). Locally, streamlit run shelfready_app.py still works as before.
 
 import streamlit as st
 from starlette.middleware import Middleware

@@ -1,4 +1,4 @@
-#Small tool to read the text of a listing. The rules use them.
+# Small tool to read the text of a listing. The rules use them.
 
 import re
 

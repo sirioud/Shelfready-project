@@ -1,12 +1,11 @@
-#The two reports: text for the terminal and an html page for the browser."""
+# The two reports the web page offers for download: an html page and the json results.
 
 from datetime import date
 from html import escape
-from pathlib import Path
 
 from .rules import POINTS, CRITERION_OF_RULE
 from .questions import question_summary, unanswered_questions
-from .scoring import ProductScore, count_ready, count_unanswered, most_common_problems
+from .scoring import ProductScore, count_ready, most_common_problems
 
 # the five criteria, in display order. each rule is mapped to one of these in rules.RULE_REGISTRY
 CRITERIA: list[str] = ["Distinctive attributes", "Disambiguation", "Price / content coherence", "Structuring", "Clear wording"]
@@ -64,42 +63,6 @@ BASIS_OF_RULE: dict[str, str] = {
     "keyword_stuffing": "GEO (Aggarwal et al., KDD 2024): keyword stuffing lowers visibility in AI answers; Merchant Center titles stop at 150 characters",
     "clear_opening": "GEO guidance for shops: the first sentence says what the product is and who it is for",
 }
-
-
-def terminal_report(scores: list[ProductScore], catalog_score: float, errors: list[str]) -> str:
-    lines: list[str] = []
-    lines.append(f"AI readability score: {catalog_score} / 100")
-    lines.append(f"Products likely to be recommended: {count_ready(scores)} of {len(scores)}")
-    lines.append(f"Shopper questions that cannot be matched: {count_unanswered(scores)}")
-    lines.append("")
-
-    problems: list[tuple[str, int]] = most_common_problems(scores)
-    if len(problems) > 0:
-        lines.append("Most common problems:")
-        for rule, count in problems:
-            lines.append(f"  - {rule} ({CRITERION_OF_RULE[rule]}): {count} product(s)")
-        lines.append("")
-
-    for product_score in scores:
-        status: str = "FIX"
-        if product_score.is_ready:
-            status = "OK "
-        # :<8 pads the id to 8 characters, :>3 puts the score on the right
-        lines.append(f"[{status}] {product_score.product.id:<8} {product_score.score:>3}  {product_score.product.title[:40]}")
-        for result in product_score.failed:
-            lines.append(f"            - {result.message}")
-        if product_score.blocked:
-            lines.append("            ! Blocked: Google Merchant Center would reject this listing")
-        for question in unanswered_questions(product_score.product):
-            lines.append(f"            ? Cannot be matched to: {question}")
-
-    if len(errors) > 0:
-        lines.append("")
-        lines.append("Rows skipped:")
-        for error in errors:
-            lines.append(f"  - {error}")
-
-    return "\n".join(lines)
 
 
 def criterion_percentages(scores: list[ProductScore]) -> dict[str, int]:
@@ -277,14 +240,6 @@ def html_report(scores: list[ProductScore], catalog_score: float, errors: list[s
 
     page.append("</main></body></html>")
     return "\n".join(page)
-
-
-def write_html_report(path: str | Path, scores: list[ProductScore], catalog_score: float, errors: list[str], source_name: str = "", sector: str = "") -> Path:
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True) # creates the reports/ folder the first time
-    page: str = html_report(scores, catalog_score, errors, source_name, sector)
-    path.write_text(page, encoding="utf-8")
-    return path
 
 
 def json_report(scores: list[ProductScore], catalog_score: float, errors: list[str], source_name: str = "", sector: str = "") -> dict:

@@ -1,7 +1,7 @@
-#ShelfReady web page. Run from the root of the repository:
-#conda activate nomades_nppd_312
-#streamlit run shelfready_app.py
-#the checks are the same as the command line, this file only shows the results."""
+# ShelfReady web page. Run from the root of the repository:
+# conda activate nomades_nppd_312
+# streamlit run shelfready_app.py
+# the checks are in the shelfready package, this file only shows the results.
 
 import json
 from pathlib import Path

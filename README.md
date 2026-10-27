@@ -19,13 +19,9 @@ standards (for example the temperature ratings of sleeping bags) instead of
 generic rules. It is free, needs no account or API key, and only reads the
 CSV file.
 
-There are two ways to use it, with the same checks and the same scores:
-
-1. a web page made with Streamlit, online at https://shelfready-project.onrender.com
-
-2. a command line tool: `python -m shelfready audit FILE.csv`
-
-Both can also export an AI-ready feed for Google Merchant Center (see below).
+It is a web page made with Streamlit, online at
+https://shelfready-project.onrender.com. The page can also export an AI-ready
+feed for Google Merchant Center (see below).
 
 ## Project structure
 
@@ -36,9 +32,8 @@ nomades_project/
 ├── requirements-freeze.txt   the whole course environment, for the full Docker image
 ├── Dockerfile                the image used on Render
 ├── docs/                     testing guide, code notes, CSV references, sample data chart
-├── tests/                    94 unittest tests, one file per module
+├── tests/                    13 unittest tests on the core of the app
 └── shelfready/               all the checking logic
-    ├── __main__.py           command line
     ├── loader.py             reads and validates the CSV
     ├── attributes.py         reads specs such as "volume_l: 30 | weight_g: 900"
     ├── models.py             Product and RuleResult
@@ -47,7 +42,7 @@ nomades_project/
     ├── questions.py          shopper questions a listing can or cannot answer
     ├── feed.py               the AI-ready feed
     ├── sector.py             the outdoor-gear knowledge, as data
-    ├── report.py             terminal, HTML and JSON reports
+    ├── report.py             HTML and JSON reports
     └── data/                 sample_products.csv, test_shop.csv
 ```
 ## Online version
@@ -133,7 +128,7 @@ before uploading it.
 python -m unittest
 ```
 
-94 tests. The two web page tests only run where Streamlit is installed
+13 tests. The two web page tests only run where Streamlit is installed
 (`nomades_nppd_312`) and are skipped elsewhere. See [TESTING.md](docs/TESTING.md).
 
 Code style: constants in `UPPER_CASE` (PEP 8), functions and variables in
