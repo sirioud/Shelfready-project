@@ -27,6 +27,15 @@ class RuleTests(unittest.TestCase):
     def test_currency_in_lower_case_is_accepted(self):
         self.assertTrue(rules.check_feed_standard(good_product(currency="eur")).passed)
 
+    def test_feed_standard_needs_an_image(self):
+        # google merchant center refuses a product without an image link
+        self.assertFalse(rules.check_feed_standard(good_product(image_url="")).passed)
+
+    def test_sleeping_bag_temperatures_go_down(self):
+        # EN ISO 23537: comfort > limit > extreme. here comfort (-10) is colder than limit (-5)
+        product = good_product(category="sleeping_bag", attributes="comfort_c: -10 | limit_c: -5 | extreme_c: -20 | weight_g: 1100")
+        self.assertFalse(rules.check_plausible_values(product).passed)
+
 
 class RegistryTests(unittest.TestCase):
     def test_points_add_up_to_100(self):

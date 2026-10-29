@@ -18,6 +18,18 @@ class LoaderTests(unittest.TestCase):
         self.assertEqual(products[0].id, "P2")
         self.assertEqual(errors, ["Line 2: price is not a number"])
 
+    def test_reads_semicolon_file_with_messy_header(self):
+        # excel in switzerland and france separates the columns with ; and exports often write "ID" or " Title "
+        products, errors = load_products_from_text("ID; Title ;Price\nP1;Mug;12,50\n")
+        self.assertEqual(len(products), 1)
+        self.assertEqual(products[0].title, "Mug")
+        self.assertEqual(products[0].price, 12.5)
+
+    def test_skips_duplicate_id(self):
+        products, errors = load_products_from_text(HEADER + "P1,mug,Mug,,12,EUR,,,,,\n" + "P1,mug,Cup,,9,EUR,,,,,\n")
+        self.assertEqual(len(products), 1)
+        self.assertEqual(errors, ["Line 3: duplicate id P1 (already on line 2)"])
+
     def test_parse_price_refuses_nan_and_inf(self):
         # float accepts "nan" and "inf", but we don't want them in a price
         self.assertRaises(ValueError, parse_price, "nan")

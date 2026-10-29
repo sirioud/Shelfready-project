@@ -7,3 +7,4 @@ shelfready_ai_feed.tsv
 shelfready_template.csv
 shelfready_report.html
 shelfready_results.json
+.coverage

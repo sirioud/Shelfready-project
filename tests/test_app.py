@@ -9,18 +9,20 @@ except ImportError:
     HAS_STREAMLIT = False
 
 APP_FILE: Path = Path(__file__).parent.parent / "shelfready_app.py"
+# seconds streamlit may take to run the page. its default of 3 is too short on a cold start or under coverage
+APP_TIMEOUT: int = 15
 
 
 @unittest.skipUnless(HAS_STREAMLIT, "streamlit is not installed in this environment")
 class AppTests(unittest.TestCase):
     def test_start_page_asks_for_a_file(self):
-        app = AppTest.from_file(str(APP_FILE)).run()
+        app = AppTest.from_file(str(APP_FILE)).run(timeout=APP_TIMEOUT)
         self.assertEqual(len(app.exception), 0)
         self.assertIn("Upload a CSV file", app.info[0].value)
 
     def test_sample_shop(self):
-        app = AppTest.from_file(str(APP_FILE)).run()
-        app.checkbox[0].check().run()
+        app = AppTest.from_file(str(APP_FILE)).run(timeout=APP_TIMEOUT)
+        app.checkbox[0].check().run(timeout=APP_TIMEOUT)
         self.assertEqual(len(app.exception), 0)
         self.assertEqual(app.metric[0].value, "85.3 / 100")
         self.assertEqual(app.metric[1].value, "5 of 10")
