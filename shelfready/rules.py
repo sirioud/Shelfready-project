@@ -25,6 +25,8 @@ MIN_STRUCTURED_SHARE: float = 0.5 # at least half the specs in the description m
 COMPATIBILITY_PATTERN: re.Pattern = re.compile(r"\bcompatible\s+with\b[^.]*", re.IGNORECASE)
 # a model name like "Primus 2", a size like "15 in", or a brand in capitals like "MSR"
 MODEL_PATTERN: re.Pattern = re.compile(r"\b(?:[A-Z][A-Za-z]+\s?\d|\d+\s?(?:in|mm|cm)|[A-Z]{2,})\b")
+# vague words that are not a model, even in capitals: "compatible with ALL bladders"
+VAGUE_WORDS: list[str] = ["all", "any", "most", "many", "every", "standard", "common"]
 CURRENCY_PATTERN: re.Pattern = re.compile(r"^[A-Z]{3}$") # EUR, CHF, USD
 
 MIN_CLAIMS: int = 2 # from 2 marketing words, the description needs as many numbers
@@ -87,7 +89,11 @@ def check_compatibility(product: Product) -> RuleResult:
     claims: list[str] = COMPATIBILITY_PATTERN.findall(text)
     vague: list[str] = []
     for claim in claims:
-        if MODEL_PATTERN.search(claim) is None:
+        # take the vague words out first, so "ALL" cannot pass as a brand like "MSR"
+        cleaned: str = claim
+        for word in VAGUE_WORDS:
+            cleaned = re.sub(r"\b" + word + r"\b", "", cleaned, flags=re.IGNORECASE)
+        if MODEL_PATTERN.search(cleaned) is None:
             vague.append(claim)
     passed: bool = len(vague) == 0
     return make_result("compatibility", passed, "Compatibility claim without a precise list of models")
@@ -149,7 +155,8 @@ def check_feed_standard(product: Product) -> RuleResult:
     if availability not in AVAILABILITY_VALUES:
         problems.append(f"availability '{product.availability}' is not an accepted value")
 
-    if CURRENCY_PATTERN.match(product.currency) is None:
+    currency: str = product.currency.strip().upper() # "eur" -> "EUR", like availability above
+    if CURRENCY_PATTERN.match(currency) is None:
         problems.append("currency is not a three-letter code")
 
     brand: str = product.brand.strip().lower()

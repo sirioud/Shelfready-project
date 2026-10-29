@@ -1,8 +1,3 @@
-# ShelfReady web page. Run from the root of the repository:
-# conda activate nomades_nppd_312
-# streamlit run shelfready_app.py
-# the checks are in the shelfready package, this file only shows the results.
-
 import json
 from pathlib import Path
 
@@ -208,9 +203,10 @@ def show_listings(result: AuditResult) -> None:
             st.badge(f"{status} · {product_score.score} / 100", color=colour)
             if product_score.blocked:
                 st.error("Google Shopping would reject this listing as it is. Fix this first.")
-            for result in product_score.failed:
-                st.markdown(f"**{RULE_NAMES[result.rule]}**: {result.message}  \nFix: {HOW_TO_FIX[result.rule]}")
-                st.caption(BASIS_OF_RULE[result.rule])
+            # rule_result, not result: result is already the AuditResult this function receives
+            for rule_result in product_score.failed:
+                st.markdown(f"**{RULE_NAMES[rule_result.rule]}**: {rule_result.message}  \nFix: {HOW_TO_FIX[rule_result.rule]}")
+                st.caption(BASIS_OF_RULE[rule_result.rule])
             for question in unanswered_questions(product_score.product):
                 st.markdown(f"**Cannot be matched**: {question}")
 
