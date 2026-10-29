@@ -10,8 +10,9 @@ KEY_VALUE_SEPARATOR: str = ":"
 
 # a number followed by a unit: 30 l, 900 g, 750 ml, 400 lm, 20 h, 3 min, -8 °C
 # the minus sign is only kept when it is not stuck to a word, so "2-person" stays positive
+# "in" followed by a number is the word "in", not inches: "2 in 1 backpack"
 NUMBER_WITH_UNIT: re.Pattern = re.compile(
-    r"((?:(?<![\w-])[-−])?\d+(?:[.,]\d+)?)\s*(°\s?c|minutes|min|ml|lm|l|g|kg|cm|mm|in|h|w|wh)(?![\w])", re.IGNORECASE
+    r"((?:(?<![\w-])[-−])?\d+(?:[.,]\d+)?)\s*(°\s?c|minutes|min|ml|lm|l|g|kg|cm|mm|in(?!\s*\d)|h|w|wh)(?![\w])", re.IGNORECASE
 )
 # a number on its own, not stuck to a letter (p001) or part of a decimal (12.5)
 # a full stop after it is fine: "aged 6 to 10." still finds 10

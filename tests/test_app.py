@@ -4,14 +4,14 @@ from pathlib import Path
 # the web page needs streamlit, which is only in the nomades_nppd_312 environment
 try:
     from streamlit.testing.v1 import AppTest
-    Has_streamlit: bool = True
+    HAS_STREAMLIT: bool = True
 except ImportError:
-    Has_streamlit = False
+    HAS_STREAMLIT = False
 
 APP_FILE: Path = Path(__file__).parent.parent / "shelfready_app.py"
 
 
-@unittest.skipUnless(Has_streamlit, "streamlit is not installed in this environment")
+@unittest.skipUnless(HAS_STREAMLIT, "streamlit is not installed in this environment")
 class AppTests(unittest.TestCase):
     def test_start_page_asks_for_a_file(self):
         app = AppTest.from_file(str(APP_FILE)).run()

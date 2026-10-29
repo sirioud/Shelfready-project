@@ -5,7 +5,6 @@
 import csv
 import io
 import math
-
 from .models import Product
 
 # columns the file must have, otherwise we cannot do anything
@@ -37,7 +36,7 @@ def parse_price(raw: str | None) -> float | None:
 
     text = text.replace(",", ".") # decimal comma becomes a decimal point
     price: float = float(text)
-    if math.isnan(price) or math.isinf(price):
+    if math.isnan(price) or math.isinf(price): #float("nan") or float("inf") are valid floats but not valid prices
         raise ValueError("price is not a number")
     return price
 
@@ -63,7 +62,7 @@ def decode_bytes(data: bytes, name: str) -> str:
     except UnicodeDecodeError:
         raise LoaderError(f"Cannot read {name}: save it as CSV UTF-8 and try again")
 
-
+#main function
 def load_products_from_text(text: str) -> tuple[list[Product], list[str]]:
     # the web page gives the file as text: an uploaded file has no path
     products: list[Product] = []
@@ -74,7 +73,7 @@ def load_products_from_text(text: str) -> tuple[list[Product], list[str]]:
     delimiter: str = ";" if ";" in first_line else "," # some shops export semicolon
     reader: csv.DictReader = csv.DictReader(io.StringIO(text), delimiter=delimiter)
 
-    header:list[str] = []
+    header: list[str] = []
     if reader.fieldnames is not None:
         for name in reader.fieldnames:
             header.append(name.strip().lower()) # ignore capitals and spaces in the header

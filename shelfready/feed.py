@@ -33,7 +33,7 @@ def with_unit(key: str, value: str) -> str:
         return value
     if to_number(value) is None:
         return value
-    if value.replace(".", "").replace("-", "").replace(",", "").isdigit():
+    if value.replace(".", "").replace("-", "").replace("−", "").replace(",", "").isdigit(): # "−" is the typographic minus
         unit: str = UNIT_OF_KEY[key].replace("°c", "°C").replace("w", "W")
         return f"{value} {unit}"
     return value # the value already has its unit, e.g. "30 l"
