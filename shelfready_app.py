@@ -1,3 +1,9 @@
+# ShelfReady web page (streamlit), the only entry point of the app.
+# Run locally with: streamlit run shelfready_app.py
+# Streamlit runs this whole file again from top to bottom on every click,
+# so nothing is kept between two clicks unless the widget itself remembers it (the uploaded file, the checkbox).
+# This file only shows things: the loading, scoring and reports are in the shelfready/ package.
+
 import json
 from pathlib import Path
 
@@ -21,6 +27,7 @@ from shelfready.report import (
 from shelfready.scoring import PASS_SCORE, ProductScore, count_ready, count_unanswered, most_common_problems, score_catalog
 from shelfready.sector import EXPECTED_ATTRIBUTES, SECTOR
 
+# __file__ = the path of this file, so the sample is found whatever folder the app is started from
 SAMPLE_FILE: Path = Path(__file__).parent / "shelfready" / "data" / "sample_products.csv"
 
 
@@ -100,6 +107,7 @@ def needs_work(product_score: ProductScore) -> bool:
 
 
 def show_sidebar() -> None:
+    # everything written inside "with st.sidebar:" goes in the left column instead of the main page
     with st.sidebar:
         st.header("How it works")
         st.markdown(
@@ -153,6 +161,7 @@ def show_overview(result: AuditResult) -> None:
 
     st.subheader("Score by criterion")
     percentages: dict[str, int] = criterion_percentages(scores)
+    # one column per criterion: zip pairs the first criterion with the first column, the second with the second...
     for name, column in zip(CRITERIA, st.columns(len(CRITERIA))):
         column.metric(name, f"{percentages[name]}%", help=CRITERION_HELP[name])
         column.progress(percentages[name] / 100) # needs a value from 0 to 1
@@ -167,7 +176,7 @@ def show_overview(result: AuditResult) -> None:
 def show_listings(result: AuditResult) -> None:
     only_to_fix: bool = st.toggle("Show only listings that need work", value=True)
 
-    # worst first
+    # worst first: sorted() calls score_of on each listing and sorts by that number, smallest first
     sorted_scores: list[ProductScore] = sorted(result.scores, key=score_of)
 
     rows: list[dict] = []
@@ -185,6 +194,7 @@ def show_listings(result: AuditResult) -> None:
         st.success("Every listing is ready. Nothing to fix.")
         return
     # the status carries the colour, the score is shown as a bar out of 100
+    # .style.map calls status_cell on every cell of the Status column and uses the css it returns
     table = pd.DataFrame(rows).style.map(status_cell, subset=["Status"])
     score_bar = st.column_config.ProgressColumn("Score", min_value=0, max_value=100, format="%d")
     st.dataframe(table, hide_index=True, width="stretch", column_config={"Score": score_bar})
@@ -236,6 +246,7 @@ def show_downloads(result: AuditResult) -> None:
     st.markdown("Keep a copy of the results, or send the report to a colleague.")
     page: str = html_report(result.scores, result.catalog_score, result.errors, result.source_name, SECTOR)
     data: dict = json_report(result.scores, result.catalog_score, result.errors, result.source_name, SECTOR)
+    # the files are made in memory and handed to the browser, nothing is written on the server
     left, right = st.columns(2)
     left.download_button("Report (HTML)", page, file_name="shelfready_report.html", mime="text/html")
     right.download_button("Results (JSON)", json.dumps(data, indent=2, ensure_ascii=False), file_name="shelfready_results.json", mime="application/json")
@@ -271,10 +282,12 @@ def load_input() -> AuditResult | None:
         else:
             show_welcome()
             return None
+        # types declared first, because the function returns two values at once (a tuple)
         products: list[Product]
         errors: list[str]
         products, errors = load_products_from_text(text)
     except LoaderError as error:
+        # the whole file is unusable: show the reason from loader.py instead of crashing the page
         st.error(f"This file cannot be read. {error}")
         return None
 
@@ -297,7 +310,7 @@ def main() -> None:
 
     result: AuditResult | None = load_input()
     if result is None:
-        return
+        return # nothing to score yet, load_input already showed a message
 
     show_verdict(result)
     overview, listings, questions, downloads = st.tabs(["Overview", "Listings", "Shopper questions", "Download"])
@@ -311,5 +324,7 @@ def main() -> None:
         show_downloads(result)
 
 
+# streamlit run (and the AppTest in the tests) runs this file as "__main__", so the page is drawn
+# importing it from another file does not draw anything
 if __name__ == "__main__":
     main()

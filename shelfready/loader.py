@@ -12,7 +12,7 @@ REQUIRED_COLUMNS: set[str] = {"id", "title", "price"}
 
 
 class LoaderError(Exception):
-    # raised when the whole file cannot be read
+    # raised when the whole file cannot be read.  This class inherits from builtin Exception, so it can be caught with "except Exception" or "except LoaderError"
     pass
 
 
@@ -35,7 +35,7 @@ def parse_price(raw: str | None) -> float | None:
         text = text[:-2] # 89.- becomes 89
 
     text = text.replace(",", ".") # decimal comma becomes a decimal point
-    price: float = float(text)
+    price: float = float(text) # raises ValueError for text like "abc", the loader catches it
     if math.isnan(price) or math.isinf(price): #float("nan") or float("inf") are valid floats but not valid prices
         raise ValueError("price is not a number")
     return price
@@ -50,7 +50,7 @@ def clean_cell(row: dict, column: str) -> str:
 
 
 def decode_bytes(data: bytes, name: str) -> str:
-    # turns the raw bytes of a file into text, trying the encodings shop exports use
+    # turns the raw bytes of a file into text, trying the encodings -shop exports- use
     # utf-8-sig = utf-8, and also removes the invisible mark Excel puts at the start of the file
     # cp1252 = older Windows / Excel exports (accents like "café" are stored differently)
     try:
@@ -71,6 +71,8 @@ def load_products_from_text(text: str) -> tuple[list[Product], list[str]]:
 
     first_line: str = text.splitlines()[0] if text else ""
     delimiter: str = ";" if ";" in first_line else "," # some shops export semicolon
+    # DictReader reads a file, not a string: io.StringIO wraps the text so it behaves like an open file
+    # each row then comes out as a dict {column name: cell}, using the first line as the column names
     reader: csv.DictReader = csv.DictReader(io.StringIO(text), delimiter=delimiter)
 
     header: list[str] = []
@@ -94,6 +96,7 @@ def load_products_from_text(text: str) -> tuple[list[Product], list[str]]:
         line_number: int = last_line + 1 # the line where this row starts
         last_line = reader.line_num
 
+        # for a bad row: note the error, then continue = skip the rest of the loop and go to the next row
         product_id: str = clean_cell(row, "id")
         if product_id == "":
             errors.append(f"Line {line_number}: missing id")

@@ -29,6 +29,7 @@ class ProductScore:
             if result.rule in BLOCKING_RULES:
                 self.blocked = True
 
+        # ready = enough points AND not blocked. a blocked listing at 90 points is still not ready
         self.is_ready: bool = score >= PASS_SCORE and not self.blocked
 
     def to_dict(self) -> dict:
@@ -50,10 +51,12 @@ class ProductScore:
 
 
 def score_product(product: Product) -> ProductScore:
+    # runs the 14 rules on one product. a passed rule gives its points, a failed one gives 0
+    # the score is the sum, out of 100 (the points in RULE_REGISTRY add up to 100)
     results: list[RuleResult] = []
     total: int = 0
     for rule in ALL_RULES:
-        result: RuleResult = rule(product)
+        result: RuleResult = rule(product) # rule is a function from the list, called like any function
         results.append(result)
         total = total + result.points
     return ProductScore(product, total, results)
@@ -66,7 +69,7 @@ def score_catalog(products: list[Product]) -> tuple[list[ProductScore], float]:
         scores.append(score_product(product))
 
     if len(scores) == 0:
-        return scores, 0.0
+        return scores, 0.0 # no products: avoid dividing by 0 below
 
     total: int = 0
     for product_score in scores:
@@ -111,5 +114,5 @@ def most_common_problems(scores: list[ProductScore], limit: int = 3) -> list[tup
                 best_rule = rule
                 best_count = counts[rule]
         problems.append((best_rule, best_count))
-        del counts[best_rule]
+        del counts[best_rule] # remove it, so the next loop finds the next biggest
     return problems
