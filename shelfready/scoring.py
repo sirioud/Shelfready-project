@@ -32,23 +32,6 @@ class ProductScore:
         # ready = enough points AND not blocked. a blocked listing at 90 points is still not ready
         self.is_ready: bool = score >= PASS_SCORE and not self.blocked
 
-    def to_dict(self) -> dict:
-        # for the json download
-        failed_rules: list[dict] = []
-        for result in self.failed:
-            failed_rules.append({"rule": result.rule, "message": result.message})
-
-        return {
-            "id": self.product.id,
-            "title": self.product.title,
-            "category": self.product.category,
-            "score": self.score,
-            "ready": self.is_ready,
-            "blocked": self.blocked,
-            "failed": failed_rules,
-            "cannot_be_matched": unanswered_questions(self.product),
-        }
-
 
 def score_product(product: Product) -> ProductScore:
     # runs the 14 rules on one product. a passed rule gives its points, a failed one gives 0

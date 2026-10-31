@@ -4,7 +4,6 @@
 # so nothing is kept between two clicks unless the widget itself remembers it (the uploaded file, the checkbox).
 # This file only shows things: the loading, scoring and reports are in the shelfready/ package.
 
-import json
 from pathlib import Path
 
 import pandas as pd # comes with streamlit, used to colour the table cells
@@ -17,12 +16,13 @@ from shelfready.questions import question_summary, unanswered_questions
 from shelfready.report import (
     BASIS_OF_RULE,
     CRITERIA,
+    CRITERION_EXAMPLE,
     HOW_TO_FIX,
     RULE_NAMES,
+    count_text,
     criterion_percentages,
-    html_report,
-    json_report,
     level,
+    pdf_report,
 )
 from shelfready.scoring import PASS_SCORE, ProductScore, count_ready, count_unanswered, most_common_problems, score_catalog
 from shelfready.sector import EXPECTED_ATTRIBUTES, SECTOR
@@ -63,7 +63,7 @@ CRITERION_HELP: dict[str, str] = {
     "Clear wording": "Is the text written for an AI assistant: facts instead of marketing words, a clear first sentence, no keyword stuffing?",
 }
 
-# cell colours, same green / orange / red as the html report
+# cell colours, same green / orange / red as the pdf report
 # a light background with dark text, so it stays readable in light and dark mode
 GOOD_CELL: str = "background-color: #d9efe6; color: #1f7a5a"
 MEDIUM_CELL: str = "background-color: #f8ead2; color: #8a5a12"
@@ -145,7 +145,7 @@ def show_verdict(result: AuditResult) -> None:
     to_fix: int = len(scores) - ready
 
     message: str = f"**{result.catalog_score} / 100**: {ready} of {len(scores)} listings are ready, {to_fix} need work."
-    # same green / orange / red grading as the html report
+    # same green / orange / red grading as the pdf report
     grade: str = level(result.catalog_score)
     if grade == "good":
         st.success(message)
@@ -162,18 +162,19 @@ def show_overview(result: AuditResult) -> None:
     middle.metric("Ready listings", f"{count_ready(scores)} of {len(scores)}")
     right.metric("Shopper questions not matched", count_unanswered(scores), help="See the Shopper questions tab.")
 
-    st.subheader("Score by criterion")
+    st.subheader("Score breakdown")
     percentages: dict[str, int] = criterion_percentages(scores)
     # one column per criterion: zip pairs the first criterion with the first column, the second with the second...
     for name, column in zip(CRITERIA, st.columns(len(CRITERIA))):
         column.metric(name, f"{percentages[name]}%", help=CRITERION_HELP[name])
         column.progress(percentages[name] / 100) # needs a value from 0 to 1
+        column.caption(CRITERION_EXAMPLE[name])
 
     problems: list[tuple[str, int]] = most_common_problems(scores, limit=3)
     if len(problems) > 0:
         st.subheader("Fix these first")
         for rule, count in problems:
-            st.markdown(f"**{RULE_NAMES[rule]}** ({count} listing(s))  \n{HOW_TO_FIX[rule]}")
+            st.markdown(f"**{RULE_NAMES[rule]}** · {count_text(count, 'listing')}  \n{HOW_TO_FIX[rule]}")
 
 
 def show_listings(result: AuditResult) -> None:
@@ -230,9 +231,11 @@ def show_questions(result: AuditResult) -> None:
         st.info("No shopper questions for the categories in this file.")
         return
     st.markdown(
-        "These are typical requests made to an AI assistant. "
-        "A listing **cannot be matched** when the spec the assistant needs is missing: "
-        "the product may fit perfectly, but it will never be shown."
+        "Each line is something a shopper could ask an AI assistant, for example ChatGPT or Gemini. "
+        "\"Shown\" lists your products the assistant can suggest for that request. "
+        "\"Cannot be matched\" lists products the assistant has to skip, because the spec it needs "
+        "is missing from your file. Even a product that fits the request perfectly is never suggested. "
+        "Add that spec to the attributes column and the product can be shown."
     )
     rows: list[dict] = []
     for entry in summary:
@@ -247,12 +250,9 @@ def show_questions(result: AuditResult) -> None:
 
 def show_downloads(result: AuditResult) -> None:
     st.markdown("Keep a copy of the results, or send the report to a colleague.")
-    page: str = html_report(result.scores, result.catalog_score, result.errors, result.source_name, SECTOR)
-    data: dict = json_report(result.scores, result.catalog_score, result.errors, result.source_name, SECTOR)
-    # the files are made in memory and handed to the browser, nothing is written on the server
-    left, right = st.columns(2)
-    left.download_button("Report (HTML)", page, file_name="shelfready_report.html", mime="text/html")
-    right.download_button("Results (JSON)", json.dumps(data, indent=2, ensure_ascii=False), file_name="shelfready_results.json", mime="application/json")
+    report: bytes = pdf_report(result.scores, result.catalog_score, result.errors, result.source_name, SECTOR)
+    # the file is made in memory and handed to the browser, nothing is written on the server
+    st.download_button("Report (PDF)", report, file_name="shelfready_report.pdf", mime="application/pdf")
 
     st.subheader("AI-ready feed")
     st.markdown(

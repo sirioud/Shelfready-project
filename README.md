@@ -42,7 +42,7 @@ nomades_project/
     ├── questions.py          shopper questions a listing can or cannot answer
     ├── feed.py               the AI-ready feed
     ├── sector.py             the outdoor-gear knowledge, as data
-    ├── report.py             HTML and JSON reports
+    ├── report.py             the PDF report
     └── data/                 sample_products.csv, test_shop.csv
 ```
 ## Online version
