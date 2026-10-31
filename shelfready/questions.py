@@ -47,7 +47,7 @@ def answer_question(product: Product, question: tuple) -> str:
 
 def unanswered_questions(product: Product) -> list[str]:
     # the questions this listing cannot be matched to, with the missing attribute
-    # e.g. ["A sleeping bag for a night at -5 °C: needs the limit temperature in °C (limit_c)"]
+    # e.g. ["A sleeping bag for a night at -5 °C: needs the limit temperature in °C"]
     missing: list[str] = []
     for question in questions_for(product.category):
         if answer_question(product, question) == UNKNOWN:
@@ -79,4 +79,4 @@ def question_summary(products: list[Product]) -> list[dict]:
             summary.append({"question": question[0], "matches": matches, "unknown": unknown})
     return summary
 
-# TODO: add a function that returns the questions that cannot be answered for the whole catalog, e.g. ["A sleeping bag for a night at -5 °C: needs the limit temperature in °C (limit_c)"]
+# TODO: add a function that returns the questions that cannot be answered for the whole catalog, e.g. ["A sleeping bag for a night at -5 °C: needs the limit temperature in °C"]

@@ -30,17 +30,17 @@ RULE_NAMES: dict[str, str] = {
 
 # what the shop owner can do about each problem
 HOW_TO_FIX: dict[str, str] = {
-    "expected_attributes": "Add the missing specs to the attributes column, e.g. limit_c: -8 for a sleeping bag.",
+    "expected_attributes": "Add the missing specs to the attributes column, e.g. the limit temperature for a sleeping bag.",
     "attribute_count": "Give at least 3 specs in the attributes column (weight, size, material...).",
     "units": "Write the unit after every number: 75 kg, not 75.",
     "compatibility": "Name the exact models it works with instead of 'most' or 'all'.",
-    "quantity": "Add pack_size: 2 (or the right number) to the attributes.",
+    "quantity": "Add the number of items in the pack to the attributes.",
     "gtin": "Copy the barcode from the box. The last digit is a check digit, so one typo makes it invalid.",
-    "feed_standard": "Fill in the title and price and image_url, use in_stock / out_of_stock / preorder / backorder, and give a real brand.",
+    "feed_standard": "Fill in the title, the price and the image URL, set the availability to in stock, out of stock, preorder or backorder, and give a real brand.",
     "price_coherence": "Write a longer description: an expensive product needs at least 120 characters.",
     "spec_agreement": "Make the title, the description and the attributes say the same number.",
-    "plausible_values": "Check the value and its unit: weight_g is in grams, temperatures go comfort > limit > extreme.",
-    "structured_share": "Copy the numbers from the description into the attributes column, e.g. lumens_lm: 400.",
+    "plausible_values": "Check the value and its unit: the weight is in grams, temperatures go comfort > limit > extreme.",
+    "structured_share": "Copy the numbers from the description into the attributes column, e.g. the brightness in lumens.",
     "facts_not_claims": "Replace each claim with a number: 'ultra-light' becomes 'weighs 780 g'.",
     "keyword_stuffing": "Write the title as a name, each word once: brand, product type, key spec.",
     "clear_opening": "Start the description with what the product is and what it is for: 'Hiking daypack for day trips...'.",

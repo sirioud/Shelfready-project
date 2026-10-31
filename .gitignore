@@ -8,3 +8,6 @@ shelfready_template.csv
 shelfready_report.html
 shelfready_results.json
 .coverage
+
+# api keys, never committed (same pattern as creds.json in the course repo)
+*creds.json
