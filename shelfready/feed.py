@@ -22,9 +22,9 @@ def short_label(key: str) -> str:
     label: str = key
     if key in ATTRIBUTE_LABELS:
         label = ATTRIBUTE_LABELS[key]
-    label = label.split(":")[0]
-    label = label.split(" in ")[0]
-    return label[0].upper() + label[1:]
+    label = label.split(":")[0] # keep what is before the colon
+    label = label.split(" in ")[0] # keep what is before " in "
+    return label[0].upper() + label[1:] # first letter in capitals
 
 
 def with_unit(key: str, value: str) -> str:
@@ -33,6 +33,8 @@ def with_unit(key: str, value: str) -> str:
         return value
     if to_number(value) is None:
         return value
+    # a plain number: once the ".", ",", "-" and "−" are removed, only digits are left ("-8.5" -> "85")
+    # if a unit is already written ("30 l"), it is not only digits, so we do not add the unit twice
     if value.replace(".", "").replace("-", "").replace("−", "").replace(",", "").isdigit(): # "−" is the typographic minus
         unit: str = UNIT_OF_KEY[key].replace("°c", "°C").replace("w", "W")
         return f"{value} {unit}"
@@ -72,7 +74,7 @@ def questions_and_answers(product: Product) -> list[tuple[str, str]]:
         if text in FEED_QUESTION_WORDING:
             text = FEED_QUESTION_WORDING[text]
 
-        key: str = question[1]
+        key: str = question[1] # the attribute the answer is based on, e.g. "limit_c"
         start: str = "Yes"
         if answer == NO:
             start = "No"
@@ -102,7 +104,7 @@ def can_be_sent(product: Product) -> bool:
 
 def supplemental_feed(products: list[Product]) -> str:
     # the whole feed as text, one line per product that has something to add
-    lines: list[str] = ["\t".join(FEED_COLUMNS)]
+    lines: list[str] = ["\t".join(FEED_COLUMNS)] # the header line, "\t" = a tab
     for product in products:
         if not can_be_sent(product):
             continue

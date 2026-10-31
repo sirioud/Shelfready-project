@@ -11,13 +11,23 @@ KEY_VALUE_SEPARATOR: str = ":"
 # a number followed by a unit: 30 l, 900 g, 750 ml, 400 lm, 20 h, 3 min, -8 °C
 # the minus sign is only kept when it is not stuck to a word, so "2-person" stays positive
 # "in" followed by a number is the word "in", not inches: "2 in 1 backpack"
+# the pattern, piece by piece:
+#   (?:(?<![\w-])[-−])?   an optional minus sign, only if there is no letter, digit or "-" just before it
+#   \d+(?:[.,]\d+)?       the number: digits, then maybe a decimal part with "." or ","
+#   ( ... )               group 1 = the number with its sign
+#   \s*                   spaces between number and unit are allowed: "30 l" and "30l"
+#   (°\s?c|minutes|...)   group 2 = the unit, one of the choices separated by |
+#   in(?!\s*\d)           "in" only when no number follows it
+#   (?![\w])              the unit must end there: "30 large" is not "30 l", and "20 wh" is "wh", not "w"
+# (?: ) = a group that is not kept, (?<! ) = "not preceded by", (?! ) = "not followed by"
 NUMBER_WITH_UNIT: re.Pattern = re.compile(
     r"((?:(?<![\w-])[-−])?\d+(?:[.,]\d+)?)\s*(°\s?c|minutes|min|ml|lm|l|g|kg|cm|mm|in(?!\s*\d)|h|w|wh)(?![\w])", re.IGNORECASE
 )
 # a number on its own, not stuck to a letter (p001) or part of a decimal (12.5)
 # a full stop after it is fine: "aged 6 to 10." still finds 10
+# (?<![\w.,]) = no letter, digit, "." or "," just before. (?!\w|[.,]\d) = no letter, digit, or decimal part just after
 BARE_NUMBER: re.Pattern = re.compile(r"(?<![\w.,])\d+(?:[.,]\d+)?(?!\w|[.,]\d)")
-# "pack of 4", "set of 6", "box of 2"
+# "pack of 4", "set of 6", "box of 2". \b = word boundary, group 1 = the number
 QUANTITY_PHRASE: re.Pattern = re.compile(r"\b(?:pack|set|box)\s+of\s+(\d+)\b", re.IGNORECASE)
 
 # which unit belongs to which attribute key
@@ -62,6 +72,7 @@ def specs_in_text(text: str | None) -> list[tuple[str, str]]:
     if text is None:
         return found
 
+    # the pattern has two groups, so findall gives one (number, unit) tuple per match
     matches: list[tuple[str, str]] = NUMBER_WITH_UNIT.findall(text)
     for match in matches:
         value: str = match[0].replace(",", ".").replace("−", "-") # "−" is the typographic minus sign
@@ -78,6 +89,7 @@ def bare_numbers(text: str | None) -> list[str]:
         return found
 
     # positions of numbers that are fine because a unit or "pack of" explains them
+    # finditer instead of findall: it gives match objects, which know where in the text they start
     covered: list[int] = []
     for match in NUMBER_WITH_UNIT.finditer(text):
         start: int = match.start(1)
@@ -106,6 +118,7 @@ LEADING_NUMBER: re.Pattern = re.compile(r"-?\d+(?:\.\d+)?")
 def to_number(value: str) -> float | None:
     # "1100" -> 1100.0, "-2" -> -2.0, "1,5" -> 1.5, "30 l" -> 30.0, "30l" -> 30.0, "light" -> None
     text: str = value.strip().replace(",", ".").replace("−", "-")
+    # match() only looks at the start of the text (search() would look everywhere), so "size 42" -> None
     match: re.Match | None = LEADING_NUMBER.match(text)
     if match is None:
         return None

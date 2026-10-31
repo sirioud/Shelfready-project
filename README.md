@@ -128,8 +128,8 @@ before uploading it.
 python -m unittest
 ```
 
-13 tests. The two web page tests only run where Streamlit is installed
-(`nomades_nppd_312`) and are skipped elsewhere. See [TESTING.md](docs/TESTING.md).
+22 tests. The two web page tests only run where Streamlit is installed
+(`nomades_nppd_312`) and are skipped elsewhere.
 
 Code style: constants in `UPPER_CASE` (PEP 8), functions and variables in
 `snake_case`, classes in `CamelCase`, typed variables.
@@ -151,8 +151,10 @@ using the standards of one sector. For example, listing P003 in the sample file
 has every field filled in but scores 71, because its brightness and battery
 runtime are only written in the description.
 
-ShelfReady does not read Shopify or XML exports directly, check the live
-product page, or use Google's own attribute weights, which some of these tools
-do.
+ShelfReady does not read Shopify or XML exports directly or check the live
+product page, which some of these tools do. Google publishes no numeric weights
+for its attributes, only whether each one is required, recommended or optional.
+Channable bases its weights on Google's guidance; ShelfReady's points (100 in
+total, in `RULE_REGISTRY`) are the project's own judgement.
 
 

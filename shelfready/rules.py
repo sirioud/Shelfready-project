@@ -22,18 +22,24 @@ MIN_PREMIUM_DESCRIPTION: int = 120 # characters
 MIN_STRUCTURED_SHARE: float = 0.5 # at least half the specs in the description must also be attributes
 
 # "compatible with ..." up to the full stop. "helmet-compatible hood" is a description, not a claim
+# [^.]* = any characters except a full stop, as many as possible
 COMPATIBILITY_PATTERN: re.Pattern = re.compile(r"\bcompatible\s+with\b[^.]*", re.IGNORECASE)
 # a model name like "Primus 2", a size like "15 in", or a brand in capitals like "MSR"
+# three choices separated by |:
+#   [A-Z][A-Za-z]+\s?\d   a capital, more letters, then a digit: "Primus 2"
+#   \d+\s?(?:in|mm|cm)    a size: "15 in", "28mm"
+#   [A-Z]{2,}             two or more capitals: "MSR"
+# no re.IGNORECASE here: the capitals are what tells a name apart from an ordinary word
 MODEL_PATTERN: re.Pattern = re.compile(r"\b(?:[A-Z][A-Za-z]+\s?\d|\d+\s?(?:in|mm|cm)|[A-Z]{2,})\b")
 # vague words that are not a model, even in capitals: "compatible with ALL bladders"
 VAGUE_WORDS: list[str] = ["all", "any", "most", "many", "every", "standard", "common"]
-CURRENCY_PATTERN: re.Pattern = re.compile(r"^[A-Z]{3}$") # EUR, CHF, USD
+CURRENCY_PATTERN: re.Pattern = re.compile(r"^[A-Z]{3}$") # EUR, CHF, USD. ^ and $ = the whole text, nothing before or after
 
 MIN_CLAIMS: int = 2 # from 2 marketing words, the description needs as many numbers
 MAX_TITLE_LENGTH: int = 150 # google merchant center cuts titles after 150 characters
 MIN_WORD_LENGTH: int = 4 # shorter words ("of", "and", "for") can repeat in a normal title
 MAX_TITLE_COMMAS: int = 3 # "backpack, hiking, camping, travel" is a list of keywords, not a title
-WORD_PATTERN: re.Pattern = re.compile(r"[a-zA-Z]+")
+WORD_PATTERN: re.Pattern = re.compile(r"[a-zA-Z]+") # a word = letters in a row, so "30l" gives "l" and "day-pack" gives "day", "pack"
 
 # POINTS, ALL_RULES and CRITERION_OF_RULE are all built from RULE_REGISTRY at the end of this file,
 # so each rule is declared in exactly one place. make_result reads POINTS when a rule actually runs,
@@ -92,6 +98,7 @@ def check_compatibility(product: Product) -> RuleResult:
         # take the vague words out first, so "ALL" cannot pass as a brand like "MSR"
         cleaned: str = claim
         for word in VAGUE_WORDS:
+            # re.sub replaces every match with "" (deletes it). \b on both sides = the whole word only
             cleaned = re.sub(r"\b" + word + r"\b", "", cleaned, flags=re.IGNORECASE)
         if MODEL_PATTERN.search(cleaned) is None:
             vague.append(claim)
@@ -131,6 +138,8 @@ def is_valid_gtin(code: str) -> bool:
             weight = 3
         total = total + digits[position] * weight
 
+    # e.g. total 87: 87 % 10 = 7, 10 - 7 = 3, so the check digit must be 3 (87 + 3 = 90)
+    # the last % 10 is for a total that is already a multiple of 10: 10 - 0 = 10 becomes 0
     expected: int = (10 - total % 10) % 10
     return expected == check_digit
 
@@ -304,6 +313,7 @@ def marketing_words_in(text: str) -> list[str]:
     lowered: str = text.lower()
     for word in MARKETING_WORDS:
         # \b = word boundary, so "best" is not found inside "bestseller"
+        # re.escape protects characters that mean something in a regex, like "-" or "."
         if re.search(r"\b" + re.escape(word) + r"\b", lowered) is not None:
             found.append(word)
     return found
@@ -349,6 +359,8 @@ def check_keyword_stuffing(product: Product) -> RuleResult:
 
 def first_sentence(text: str) -> str:
     # the text up to the first full stop, "!" or "?"
+    # [.!?] = one of these three, (\s|$) = followed by a space or the end of the text,
+    # so the "." inside "1.5 kg" does not end the sentence
     match: re.Match | None = re.search(r"[.!?](\s|$)", text)
     if match is None:
         return text
@@ -397,6 +409,8 @@ def rule_name(check_function) -> str:
 
 
 # derived from the registry, so these three can never drift apart
+# [... for entry in RULE_REGISTRY] is a list comprehension: a short for loop that builds a list (or a dict with {})
+# entry[0] = the function, entry[1] = its points, entry[2] = its criterion
 ALL_RULES: list = [entry[0] for entry in RULE_REGISTRY] # the functions, in run order
 POINTS: dict[str, int] = {rule_name(entry[0]): entry[1] for entry in RULE_REGISTRY}
 CRITERION_OF_RULE: dict[str, str] = {rule_name(entry[0]): entry[2] for entry in RULE_REGISTRY}
