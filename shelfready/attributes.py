@@ -126,7 +126,7 @@ def to_number(value: str) -> float | None:
 
 
 def plain_name(key: str) -> str:
-    # "limit_c" -> "limit temperature in °C (limit_c)", the key stays so the owner knows what to type
+    # "limit_c" -> "limit temperature in °C", an unknown key like "colour_name" -> "colour name"
     if key in ATTRIBUTE_LABELS:
-        return f"{ATTRIBUTE_LABELS[key]} ({key})"
-    return key
+        return ATTRIBUTE_LABELS[key]
+    return key.replace("_", " ")

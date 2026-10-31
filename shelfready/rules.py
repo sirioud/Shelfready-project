@@ -173,7 +173,7 @@ def check_feed_standard(product: Product) -> RuleResult:
         problems.append("brand is empty or a placeholder")
 
     if product.image_url.strip() == "":
-        problems.append("image_url is empty")
+        problems.append("image URL is empty")
 
     passed: bool = len(problems) == 0
     return make_result("feed_standard", passed, "; ".join(problems))

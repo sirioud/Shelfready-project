@@ -124,7 +124,10 @@ def show_sidebar() -> None:
         )
         st.download_button("Download a template", TEMPLATE_CSV, file_name="shelfready_template.csv", mime="text/csv")
         st.header("Categories checked")
-        st.caption(", ".join(EXPECTED_ATTRIBUTES.keys()) + ". Other categories get a basic check.")
+        categories: list[str] = []
+        for category in EXPECTED_ATTRIBUTES.keys():
+            categories.append(category.replace("_", " ")) # "sleeping_bag" -> "sleeping bag"
+        st.caption(", ".join(categories) + ". Other categories get a basic check.")
 
 
 def show_welcome() -> None:
