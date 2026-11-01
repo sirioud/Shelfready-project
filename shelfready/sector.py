@@ -99,6 +99,17 @@ SHOPPER_QUESTIONS: dict[str, list[tuple]] = {
     ],
 }
 
+# needs a shopper describes to an AI assistant, for the AI search test (ai_search.py), one per category
+# same shape as SHOPPER_QUESTIONS, so answer_question() works on them: the text is what the shopper
+# wants to do, the attribute / test / value is the spec that proves a product fits that need
+NEED_QUESTIONS: dict[str, list[tuple]] = {
+    "backpack": [("A backpack for a weekend hut-to-hut hike", "volume_l", "at_least", 30)],
+    "sleeping_bag": [("A sleeping bag for a winter night in the Alps", "limit_c", "at_most", -5)],
+    "headlamp": [("A headlamp for night trail running", "lumens_lm", "at_least", 300)],
+    "bottle": [("A bottle with enough water for a long day hike", "capacity_ml", "at_least", 750)],
+    "stove": [("A stove for ultralight trekking", "weight_g", "at_most", 100)],
+}
+
 # GEO (generative engine optimization): AI assistants quote facts, not marketing claims
 # Aggarwal et al., KDD 2024: numbers raise visibility, an authoritative tone does not
 MARKETING_WORDS: list[str] = [
