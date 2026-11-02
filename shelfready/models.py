@@ -46,7 +46,7 @@ class Product:
         return self.title + " " + self.description
 
     def __repr__(self) -> str:
-        return f"Product(id='{self.id}', category='{self.category}', title='{self.title}')"
+        return f"Product(id='{self.id}', category='{self.category}', title='{self.title}', price={self.price})"
 
 
 class RuleResult:

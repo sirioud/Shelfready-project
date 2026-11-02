@@ -98,7 +98,7 @@ SHOPPER_QUESTIONS: dict[str, list[tuple]] = {
         ("Unisex shoes", "gender", "equals", "unisex"),
     ],
 }
-
+# for aisearch test:
 # needs a shopper describes to an AI assistant, for the AI search test (ai_search.py), one per category
 # same shape as SHOPPER_QUESTIONS, so answer_question() works on them: the text is what the shopper
 # wants to do, the attribute / test / value is the spec that proves a product fits that need

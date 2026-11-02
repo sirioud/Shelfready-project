@@ -119,8 +119,9 @@ def show_sidebar() -> None:
         st.header("Your file")
         st.markdown(
             "Needed columns: **id**, **title**, **price**.  \n"
-            "Also read: category, description, currency, availability, gtin, brand, image_url, attributes.  \n"
-            "Write the specs in **attributes** like this: `volume_l: 30 | weight_g: 900`"
+            "Also read: category, description, currency, availability, barcode (GTIN), brand, image URL, attributes.  \n"
+            "Write the specs (volume, weight, material...) in the **attributes** column. "
+            "Download the template below to see the exact column names and format."
         )
         st.download_button("Download a template", TEMPLATE_CSV, file_name="shelfready_template.csv", mime="text/csv")
         st.header("Categories checked")
@@ -257,7 +258,7 @@ def show_downloads(result: AuditResult) -> None:
     st.subheader("AI-ready feed")
     st.markdown(
         "A supplemental feed for Google Merchant Center, made from your own specs. "
-        "It adds **product highlights** and **questions and answers**, two attributes that "
+        "It adds product highlights and questions and answers, two attributes that "
         "Google AI Mode and Gemini read. Check it, then add it in Merchant Center as a supplemental data source. "
         "Listings whose specs disagree with the title or look wrong are left out until they are fixed."
     )
