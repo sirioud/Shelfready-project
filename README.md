@@ -28,11 +28,10 @@ feed for Google Merchant Center (see below).
 ```
 nomades_project/
 ├── shelfready_app.py         the Streamlit web page (display only)
-├── requirements.txt          packages for the web page (Streamlit)
-├── requirements-freeze.txt   the whole course environment, for the full Docker image
+├── requirements.txt          packages for the web page (Streamlit, fpdf2 for the PDF)
 ├── Dockerfile                the image used on Render
-├── docs/                     testing guide, code notes, CSV references, sample data chart
-├── tests/                    13 unittest tests on the core of the app
+├── docs/                     code notes, CSV references, sample data chart, AI search plan
+├── tests/                    unittest tests on the core of the app
 └── shelfready/               all the checking logic
     ├── loader.py             reads and validates the CSV
     ├── attributes.py         reads specs such as "volume_l: 30 | weight_g: 900"

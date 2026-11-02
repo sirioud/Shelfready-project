@@ -9,5 +9,8 @@ shelfready_report.html
 shelfready_results.json
 .coverage
 
-# api keys, never committed (same pattern as creds.json in the course repo)
+# api keys, never committed 
 *creds.json
+
+# snapshot of the whole course environment, only for the local full docker image
+requirements-freeze.txt

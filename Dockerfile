@@ -4,7 +4,7 @@ FROM python:3.12-slim
 WORKDIR /app
 
 # Which requirements file to install: requirements.txt (default, used by Render)
-# or requirements-freeze.txt (full course env): docker build --build-arg REQUIREMENTS=requirements-freeze.txt .
+# or requirements-freeze.txt (full course env, kept locally, not in git): docker build --build-arg REQUIREMENTS=requirements-freeze.txt .
 ARG REQUIREMENTS=requirements.txt
 
 # Install the requirements first, so Docker can reuse this layer when only the code changes
