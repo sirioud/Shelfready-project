@@ -1,0 +1,51 @@
+{
+  "recorded_on": "2026-11-03",
+  "model": "gemini-3.5-flash",
+  "answers": {
+    "A backpack for a weekend hut-to-hut hike": [
+      {
+        "id": "P001",
+        "recommended": true,
+        "reason": "It is a hiking-specific 30 L daypack featuring a rain cover and padded back panel, well-suited for a weekend hut-to-hut hike."
+      },
+      {
+        "id": "P009",
+        "recommended": false,
+        "reason": "It is designed for city commuting rather than outdoor hiking."
+      }
+    ],
+    "A sleeping bag for a winter night in the Alps": [
+      {
+        "id": "P002",
+        "recommended": false,
+        "reason": "A comfort rating of 0 °C is not warm enough for a freezing winter night in the Alps."
+      }
+    ],
+    "A headlamp for night trail running": [
+      {
+        "id": "P003",
+        "recommended": true,
+        "reason": "Its bright 400 lumen output and long 20-hour runtime on high make it well-suited for night trail running."
+      }
+    ],
+    "A bottle with enough water for a long day hike": [
+      {
+        "id": "P007",
+        "recommended": true,
+        "reason": "It offers a larger 750ml capacity and is described as the best bottle for every adventure."
+      },
+      {
+        "id": "P012",
+        "recommended": false,
+        "reason": "Its 500ml capacity is likely not enough water for a long day hike."
+      }
+    ],
+    "A stove for ultralight trekking": [
+      {
+        "id": "P005",
+        "recommended": true,
+        "reason": "It is a compact pocket stove that folds into a small case, making it ideal for ultralight trekking."
+      }
+    ]
+  }
+}

@@ -11,7 +11,7 @@ from .models import Product
 from .questions import NO, UNKNOWN, YES, answer_question
 from .sector import NEED_QUESTIONS
 
-AI_MODEL: str = "gemini-3.8-flash"
+AI_MODEL: str = "gemini-3.5-flash" # 3.8 was overloaded (503) on 2-3 Nov; 3.5 answers reliably
 AI_TIMEOUT_SECONDS: int = 60 # after this the call gives up, so the page never hangs
 # the key: the variable GEMINI_API_KEY on Render, or this file on your own computer (never in git, see .gitignore)
 CREDS_FILE: Path = Path(__file__).parent.parent / "config" / "gemini_creds.json"
