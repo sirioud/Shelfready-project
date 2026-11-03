@@ -1,0 +1,18 @@
+# The look of the web page: Streamlit reads this file when it starts, no Python code needed.
+# Colours: an outdoor green, the same green / orange / red family as the scores.
+
+[theme]
+base = "light"
+primaryColor = "#047857"              # buttons, toggles, progress bars, links (dark green: readable white text)
+backgroundColor = "#F7FAF8"           # page background, very light grey-green
+secondaryBackgroundColor = "#ECFDF5"  # input boxes, table headers, code
+textColor = "#0F172A"                 # almost black, easy to read
+borderColor = "#CFE8DC"               # borders of cards and tables
+baseRadius = "0.75rem"                # rounded corners
+showWidgetBorder = true
+# fonts from Google Fonts, in the format "<name>:<link>"
+font = "Nunito Sans:https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap"
+headingFont = "Rubik:https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&display=swap"
+
+[theme.sidebar]
+backgroundColor = "#ECFDF5"           # the sidebar a little greener than the page

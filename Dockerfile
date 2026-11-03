@@ -14,6 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the app and its package (code + sample data)
 COPY shelfready_app.py shelfready_server.py ./
 COPY shelfready shelfready/
+# the look of the page (colours, fonts)
+COPY .streamlit .streamlit/
 
 # Safer settings for the online version (running locally keeps streamlit's defaults)
 # - uploads up to 5 MB: the default 200 MB could use all the memory of the server
