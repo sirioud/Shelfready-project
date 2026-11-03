@@ -9,10 +9,11 @@ from pathlib import Path
 import pandas as pd # comes with streamlit, used to colour the table cells
 import streamlit as st
 
+from shelfready.ai_search import BENEFIT_UNCLEAR, AISearchError, load_api_key, load_recorded, run_search
 from shelfready.feed import supplemental_feed
 from shelfready.loader import LoaderError, decode_bytes, load_products_from_text
 from shelfready.models import Product
-from shelfready.questions import question_summary, unanswered_questions
+from shelfready.questions import YES, question_summary, unanswered_questions
 from shelfready.report import (
     BASIS_OF_RULE,
     CRITERIA,
@@ -29,6 +30,8 @@ from shelfready.sector import EXPECTED_ATTRIBUTES, SECTOR
 
 # __file__ = the path of this file, so the sample is found whatever folder the app is started from
 SAMPLE_FILE: Path = Path(__file__).parent / "shelfready" / "data" / "sample_products.csv"
+# the recorded Gemini answers for the sample shop, so the demo works without a key or a network
+AI_SAMPLE_FILE: Path = Path(__file__).parent / "shelfready" / "data" / "ai_search_sample.json"
 
 
 class AuditResult:
@@ -249,6 +252,63 @@ def show_questions(result: AuditResult) -> None:
     st.dataframe(table, hide_index=True, width="stretch")
 
 
+def show_ai_search(result: AuditResult) -> None:
+    st.markdown(
+        "A shopper describes a need to an AI assistant, for example \"a headlamp for night trail running\". "
+        "The AI picks the products it would recommend, and ShelfReady compares its picks with what your specs prove. "
+        "\"Benefit unclear\" means the product fits, but the AI did not see it: say what it is for and for whom."
+    )
+    st.caption("This sends your listings to Google's Gemini API. Results can vary between runs. The score above does not use it.")
+
+    api_key: str = load_api_key()
+    pressed: bool = st.button("Run with live AI", disabled=api_key == "")
+    if api_key == "":
+        st.caption("No Gemini key: set GEMINI_API_KEY or config/gemini_creds.json to run the live test.")
+
+    try:
+        if pressed:
+            with st.spinner("Asking Gemini..."):
+                rows: list[dict] = run_search(result.products, api_key)
+        elif result.source_name == SAMPLE_FILE.name:
+            recorded: dict = load_recorded(AI_SAMPLE_FILE)
+            st.caption(f"Recorded run, {recorded['recorded_on']} ({recorded['model']})")
+            rows = run_search(result.products, "", recorded=recorded)
+        else:
+            return # an uploaded file: nothing is sent until the button is pressed
+    except AISearchError as error:
+        st.error(str(error))
+        return
+
+    if len(rows) == 0:
+        st.info("No shopper needs for the categories in this file.")
+        return
+
+    # how many listings fit by their specs, and how many of those the AI did not pick
+    fitting: int = 0
+    unclear: int = 0
+    for row in rows:
+        if row["fits"] == YES:
+            fitting = fitting + 1
+        if row["verdict"] == BENEFIT_UNCLEAR:
+            unclear = unclear + 1
+    st.metric("Benefit unclear", f"{unclear} of {fitting} listings", help="Listings that fit the need by their specs, but that the AI did not recommend.")
+
+    table: list[dict] = []
+    for row in rows:
+        recommends: str = "no"
+        if row["recommended"]:
+            recommends = "yes"
+        table.append({
+            "Shopper need": row["need"],
+            "Listing": row["id"],
+            "Specs fit": row["fits"],
+            "AI recommends": recommends,
+            "AI's reason": row["reason"],
+            "Verdict": row["verdict"].capitalize(),
+        })
+    st.dataframe(pd.DataFrame(table), hide_index=True, width="stretch")
+
+
 def show_downloads(result: AuditResult) -> None:
     st.markdown("Keep a copy of the results, or send the report to a colleague.")
     report: bytes = pdf_report(result.scores, result.catalog_score, result.errors, result.source_name, SECTOR)
@@ -317,13 +377,15 @@ def main() -> None:
         return # nothing to score yet, load_input already showed a message
 
     show_verdict(result)
-    overview, listings, questions, downloads = st.tabs(["Overview", "Listings", "Shopper questions", "Download"])
+    overview, listings, questions, ai_search, downloads = st.tabs(["Overview", "Listings", "Shopper questions", "AI search test", "Download"])
     with overview:
         show_overview(result)
     with listings:
         show_listings(result)
     with questions:
         show_questions(result)
+    with ai_search:
+        show_ai_search(result)
     with downloads:
         show_downloads(result)
 

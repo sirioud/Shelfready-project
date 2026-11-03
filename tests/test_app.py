@@ -1,5 +1,8 @@
+import os
 import unittest
 from pathlib import Path
+
+import shelfready.ai_search
 
 # the web page needs streamlit, which is only in the nomades_nppd_312 environment
 try:
@@ -15,6 +18,17 @@ APP_TIMEOUT: int = 15
 
 @unittest.skipUnless(HAS_STREAMLIT, "streamlit is not installed in this environment")
 class AppTests(unittest.TestCase):
+    def setUp(self):
+        # no Gemini key during the tests: no variable, and a creds file that does not exist
+        self.saved_key = os.environ.pop("GEMINI_API_KEY", None)
+        self.saved_creds = shelfready.ai_search.CREDS_FILE
+        shelfready.ai_search.CREDS_FILE = Path("no_such_folder") / "gemini_creds.json"
+
+    def tearDown(self):
+        shelfready.ai_search.CREDS_FILE = self.saved_creds
+        if self.saved_key is not None:
+            os.environ["GEMINI_API_KEY"] = self.saved_key
+
     def test_start_page_asks_for_a_file(self):
         app = AppTest.from_file(str(APP_FILE)).run(timeout=APP_TIMEOUT)
         self.assertEqual(len(app.exception), 0)
@@ -36,6 +50,21 @@ class AppTests(unittest.TestCase):
         self.assertIn("Line 12: price is not a number", warnings)
         # the listings tab opens on the worst listing
         self.assertIn("P005", app.expander[0].label)
+
+    def test_ai_tab_replays_recorded_run_without_key(self):
+        app = AppTest.from_file(str(APP_FILE)).run(timeout=APP_TIMEOUT)
+        app.checkbox[0].check().run(timeout=APP_TIMEOUT)
+        self.assertEqual(len(app.exception), 0)
+        live_buttons = []
+        for button in app.button:
+            if button.label == "Run with live AI":
+                live_buttons.append(button)
+        self.assertEqual(len(live_buttons), 1)
+        self.assertTrue(live_buttons[0].disabled) # no key: the live test cannot run
+        captions: list[str] = []
+        for caption in app.caption:
+            captions.append(caption.value)
+        self.assertTrue(any("Recorded run" in text for text in captions))
 
 
 if __name__ == "__main__":
