@@ -16,8 +16,9 @@ export, gives each listing a score out of 100 and lists what to fix.
 
 It is made for one sector, outdoor and sport gear, and uses that sector's
 standards (for example the temperature ratings of sleeping bags) instead of
-generic rules. It is free, needs no account or API key, and only reads the
-CSV file.
+generic rules. It is free and needs no account. The score uses no AI and only
+reads the CSV file; an optional AI search test sends the listings to Google's
+Gemini, only when its button is pressed (see below).
 
 It is a web page made with Streamlit, online at
 https://shelfready-project.onrender.com. The page can also export an AI-ready
@@ -28,8 +29,9 @@ feed for Google Merchant Center (see below).
 ```
 nomades_project/
 ├── shelfready_app.py         the Streamlit web page (display only)
-├── requirements.txt          packages for the web page (Streamlit, fpdf2 for the PDF)
+├── requirements.txt          packages for the web page (Streamlit, fpdf2 for the PDF, google-genai for the AI test)
 ├── Dockerfile                the image used on Render
+├── .streamlit/config.toml    the look of the page (colours, fonts)
 ├── docs/                     code notes, CSV references, sample data chart, AI search plan
 ├── tests/                    unittest tests on the core of the app
 └── shelfready/               all the checking logic
@@ -40,16 +42,19 @@ nomades_project/
     ├── scoring.py            score per listing and per catalog
     ├── questions.py          shopper questions a listing can or cannot answer
     ├── feed.py               the AI-ready feed
+    ├── ai_search.py          the AI search test (Gemini), not part of the score
     ├── sector.py             the outdoor-gear knowledge, as data
     ├── report.py             the PDF report
-    └── data/                 sample_products.csv, test_shop.csv
+    └── data/                 sample_products.csv, test_shop.csv, ai_search_sample.json (recorded AI run)
 ```
 ## Online version
 
 The page is deployed on Render (free plan) as a Docker container built from the
 `Dockerfile`: Python 3.12 slim, Streamlit, the app and the package. Tests and
 docs are not copied into the image. Render's health check calls
-`/_stcore/health`.
+`/_stcore/health`. The Gemini key for the AI search test is the environment
+variable `GEMINI_API_KEY`, set in the Render dashboard. Locally it is read from
+`config/gemini_creds.json` (`{"api_key": "..."}`), which git and Docker ignore.
 
 ## The CSV file
 
@@ -121,13 +126,39 @@ wrong. It is still worth checking the file against Google's
 [product data specification](https://support.google.com/merchants/answer/7052112)
 before uploading it.
 
+## AI search test (optional)
+
+The score shows whether the specs are there. The AI search test shows whether an
+AI assistant understands what a product is *for*. A shopper's need, such as "a
+headlamp for night trail running", is sent to Gemini with the listings of that
+category, and Gemini says which products it would recommend. ShelfReady compares
+its picks with what the specs prove (the same check as the shopper questions):
+
+| Specs | Gemini recommends | Verdict |
+|---|---|---|
+| fit | yes | agree |
+| fit | no | benefit unclear: the text does not say what it is for |
+| missing | yes | guessed: recommended without the spec |
+| do not fit | yes | misled: the text suggests a use the specs do not support |
+| do not fit or missing | no | skipped |
+
+In the sample, P009 has 30 l in its specs but is described as a city daypack,
+so Gemini does not recommend it for a hike: "benefit unclear".
+
+- Not part of the score: the 100 points never change.
+- The sample shop shows a recorded run (`shelfready/data/ai_search_sample.json`),
+  so the demo works without a key or a network.
+- For an uploaded file nothing is sent until "Run with live AI" is pressed.
+  Results can vary between runs, and one model is only a simulation of real AI
+  shopping assistants.
+
 ## Tests
 
 ```bash
 python -m unittest
 ```
 
-22 tests. The two web page tests only run where Streamlit is installed
+31 tests. None of them calls Gemini. The three web page tests only run where Streamlit is installed
 (`nomades_nppd_312`) and are skipped elsewhere.
 
 Code style: constants in `UPPER_CASE` (PEP 8), functions and variables in

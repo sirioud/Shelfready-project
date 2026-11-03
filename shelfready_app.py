@@ -13,7 +13,7 @@ from shelfready.ai_search import BENEFIT_UNCLEAR, AISearchError, load_api_key, l
 from shelfready.feed import supplemental_feed
 from shelfready.loader import LoaderError, decode_bytes, load_products_from_text
 from shelfready.models import Product
-from shelfready.questions import YES, question_summary, unanswered_questions
+from shelfready.questions import NO, UNKNOWN, YES, question_summary, unanswered_questions
 from shelfready.report import (
     BASIS_OF_RULE,
     CRITERIA,
@@ -32,6 +32,8 @@ from shelfready.sector import EXPECTED_ATTRIBUTES, SECTOR
 SAMPLE_FILE: Path = Path(__file__).parent / "shelfready" / "data" / "sample_products.csv"
 # the recorded Gemini answers for the sample shop, so the demo works without a key or a network
 AI_SAMPLE_FILE: Path = Path(__file__).parent / "shelfready" / "data" / "ai_search_sample.json"
+# what the specs say about a need, in plain words for the AI search table
+SPECS_FIT_LABEL: dict[str, str] = {YES: "Yes", NO: "No", UNKNOWN: "Spec missing"}
 
 
 class AuditResult:
@@ -121,9 +123,9 @@ def show_sidebar() -> None:
         )
         st.header("Your file")
         st.markdown(
-            "Needed columns: **id**, **title**, **price**.  \n"
+            "Needed columns: id, title, price.  \n"
             "Also read: category, description, currency, availability, barcode (GTIN), brand, image URL, attributes.  \n"
-            "Write the specs (volume, weight, material...) in the **attributes** column. "
+            "Write the specs (volume, weight, material...) in the attributes column. "
             "Download the template below to see the exact column names and format."
         )
         st.download_button("Download a template", TEMPLATE_CSV, file_name="shelfready_template.csv", mime="text/csv")
@@ -162,23 +164,26 @@ def show_verdict(result: AuditResult) -> None:
 def show_overview(result: AuditResult) -> None:
     scores: list[ProductScore] = result.scores
     left, middle, right = st.columns(3)
-    left.metric("AI readability score", f"{result.catalog_score} / 100", help=f"A listing counts as ready from {PASS_SCORE} points.")
-    middle.metric("Ready listings", f"{count_ready(scores)} of {len(scores)}")
-    right.metric("Shopper questions not matched", count_unanswered(scores), help="See the Shopper questions tab.")
+    # border=True draws each number as a card
+    left.metric("AI readability score", f"{result.catalog_score} / 100", help=f"A listing counts as ready from {PASS_SCORE} points.", border=True)
+    middle.metric("Ready listings", f"{count_ready(scores)} of {len(scores)}", border=True)
+    right.metric("Shopper questions not matched", count_unanswered(scores), help="See the Shopper questions tab.", border=True)
 
     st.subheader("Score breakdown")
     percentages: dict[str, int] = criterion_percentages(scores)
     # one column per criterion: zip pairs the first criterion with the first column, the second with the second...
     for name, column in zip(CRITERIA, st.columns(len(CRITERIA))):
-        column.metric(name, f"{percentages[name]}%", help=CRITERION_HELP[name])
-        column.progress(percentages[name] / 100) # needs a value from 0 to 1
-        column.caption(CRITERION_EXAMPLE[name])
+        with column.container(border=True): # one card per criterion
+            st.metric(name, f"{percentages[name]}%", help=CRITERION_HELP[name])
+            st.progress(percentages[name] / 100) # needs a value from 0 to 1
+            st.caption(CRITERION_EXAMPLE[name])
 
     problems: list[tuple[str, int]] = most_common_problems(scores, limit=3)
     if len(problems) > 0:
         st.subheader("Fix these first")
         for rule, count in problems:
-            st.markdown(f"**{RULE_NAMES[rule]}** · {count_text(count, 'listing')}  \n{HOW_TO_FIX[rule]}")
+            with st.container(border=True):
+                st.markdown(f"**{RULE_NAMES[rule]}** · {count_text(count, 'listing')}  \n{HOW_TO_FIX[rule]}")
 
 
 def show_listings(result: AuditResult) -> None:
@@ -295,13 +300,13 @@ def show_ai_search(result: AuditResult) -> None:
 
     table: list[dict] = []
     for row in rows:
-        recommends: str = "no"
+        recommends: str = "No"
         if row["recommended"]:
-            recommends = "yes"
+            recommends = "Yes"
         table.append({
             "Shopper need": row["need"],
             "Listing": row["id"],
-            "Specs fit": row["fits"],
+            "Specs fit": SPECS_FIT_LABEL[row["fits"]],
             "AI recommends": recommends,
             "AI's reason": row["reason"],
             "Verdict": row["verdict"].capitalize(),
@@ -366,9 +371,9 @@ def load_input() -> AuditResult | None:
 
 
 def main() -> None:
-    st.set_page_config(page_title="ShelfReady", layout="wide")
+    st.set_page_config(page_title="ShelfReady", page_icon=":material/landscape:", layout="wide")
     show_sidebar()
-    st.title("ShelfReady")
+    st.title(":material/landscape: ShelfReady")
     st.write("Will an AI shopping assistant understand and recommend your products?")
     st.caption(f"Sector: {SECTOR}. Your file is only read to score it, never saved.")
 
@@ -377,7 +382,13 @@ def main() -> None:
         return # nothing to score yet, load_input already showed a message
 
     show_verdict(result)
-    overview, listings, questions, ai_search, downloads = st.tabs(["Overview", "Listings", "Shopper questions", "AI search test", "Download"])
+    overview, listings, questions, ai_search, downloads = st.tabs([
+        ":material/dashboard: Overview",
+        ":material/list_alt: Listings",
+        ":material/help: Shopper questions",
+        ":material/smart_toy: AI search test",
+        ":material/download: Download",
+    ])
     with overview:
         show_overview(result)
     with listings:

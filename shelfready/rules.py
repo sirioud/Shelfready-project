@@ -71,13 +71,13 @@ def check_expected_attributes(product: Product) -> RuleResult:
         if key not in found:
             missing.append(plain_name(key))
     passed: bool = len(missing) == 0
-    return make_result("expected_attributes", passed, f"Missing for this category: {', '.join(missing)}")
+    return make_result("expected_attributes", passed, ', '.join(missing))
 
 
 def check_attribute_count(product: Product) -> RuleResult:
     found: dict[str, str] = product.attrs()
     passed: bool = len(found) >= MIN_ATTRIBUTES
-    return make_result("attribute_count", passed, f"Fewer than {MIN_ATTRIBUTES} structured attributes")
+    return make_result("attribute_count", passed, f"{len(found)} given, at least {MIN_ATTRIBUTES} needed")
 
 
 # criterion 2: disambiguation
@@ -86,7 +86,7 @@ def check_units(product: Product) -> RuleResult:
     text: str = product.text()
     loose: list[str] = bare_numbers(text)
     passed: bool = len(loose) == 0
-    return make_result("units", passed, f"Number without a unit: {', '.join(loose[:3])}")
+    return make_result("units", passed, ', '.join(loose[:3]))
 
 
 def check_compatibility(product: Product) -> RuleResult:
@@ -103,7 +103,7 @@ def check_compatibility(product: Product) -> RuleResult:
         if MODEL_PATTERN.search(cleaned) is None:
             vague.append(claim)
     passed: bool = len(vague) == 0
-    return make_result("compatibility", passed, "Compatibility claim without a precise list of models")
+    return make_result("compatibility", passed, "no exact list of the models it works with")
 
 
 def check_quantity(product: Product) -> RuleResult:
@@ -112,7 +112,7 @@ def check_quantity(product: Product) -> RuleResult:
     match: re.Match | None = QUANTITY_PHRASE.search(text)
     found: dict[str, str] = product.attrs()
     passed: bool = match is None or "pack_size" in found
-    return make_result("quantity", passed, "Pack mentioned but the " + plain_name("pack_size") + " is missing")
+    return make_result("quantity", passed, "the text mentions a pack, but the " + plain_name("pack_size") + " is not in the attributes")
 
 
 def is_valid_gtin(code: str) -> bool:
@@ -146,7 +146,10 @@ def is_valid_gtin(code: str) -> bool:
 
 def check_gtin(product: Product) -> RuleResult:
     passed: bool = is_valid_gtin(product.gtin)
-    return make_result("gtin", passed, "Barcode (GTIN) missing or invalid")
+    message: str = "the code is not a valid barcode (wrong length or check digit)"
+    if product.gtin.strip() == "":
+        message = "no barcode given"
+    return make_result("gtin", passed, message)
 
 
 def check_feed_standard(product: Product) -> RuleResult:
@@ -186,7 +189,7 @@ def check_price_coherence(product: Product) -> RuleResult:
     if product.price is None or product.price < PREMIUM_PRICE:
         return make_result("price_coherence", True, "")
     passed: bool = len(product.description) >= MIN_PREMIUM_DESCRIPTION
-    return make_result("price_coherence", passed, f"Premium price but description shorter than {MIN_PREMIUM_DESCRIPTION} characters")
+    return make_result("price_coherence", passed, f"{len(product.description)} characters, at least {MIN_PREMIUM_DESCRIPTION} needed at this price")
 
 
 def text_conflicts(text: str, found: dict[str, str], where: str) -> list[str]:
@@ -224,7 +227,7 @@ def check_spec_agreement(product: Product) -> RuleResult:
     conflicts: list[str] = text_conflicts(product.title, found, "title")
     conflicts = conflicts + text_conflicts(product.description, found, "description")
     passed: bool = len(conflicts) == 0
-    return make_result("spec_agreement", passed, f"Text contradicts an attribute: {'; '.join(conflicts[:2])}")
+    return make_result("spec_agreement", passed, "; ".join(conflicts[:2]))
 
 
 def show_number(number: float) -> str:
@@ -268,7 +271,7 @@ def check_plausible_values(product: Product) -> RuleResult:
             previous_number = number
 
     passed: bool = len(problems) == 0
-    return make_result("plausible_values", passed, "Implausible value: " + "; ".join(problems[:2]))
+    return make_result("plausible_values", passed, "; ".join(problems[:2]))
 
 
 # criterion 4: structuring
@@ -302,7 +305,10 @@ def structured_share(product: Product) -> float:
 def check_structured_share(product: Product) -> RuleResult:
     share: float = structured_share(product)
     passed: bool = share >= MIN_STRUCTURED_SHARE
-    return make_result("structured_share", passed, "Specifications live in the description instead of structured attributes")
+    message: str = f"only {round(share * 100)}% of the numbers in the text are also in the attributes"
+    if share == 0:
+        message = "none of the numbers in the text are in the attributes"
+    return make_result("structured_share", passed, message)
 
 
 # criterion 5: clear wording (GEO)
@@ -325,7 +331,7 @@ def check_facts_not_claims(product: Product) -> RuleResult:
     claims: list[str] = marketing_words_in(text)
     facts: int = len(specs_in_text(text))
     passed: bool = len(claims) < MIN_CLAIMS or facts >= len(claims)
-    return make_result("facts_not_claims", passed, f"Marketing words instead of facts: {', '.join(claims[:4])}")
+    return make_result("facts_not_claims", passed, ', '.join(claims[:4]))
 
 
 def check_keyword_stuffing(product: Product) -> RuleResult:
@@ -345,7 +351,7 @@ def check_keyword_stuffing(product: Product) -> RuleResult:
         if counts[word] > 1:
             repeated.append(word)
     if len(repeated) > 0:
-        problems.append(f"repeated in the title: {', '.join(repeated)}")
+        problems.append(f"repeated words: {', '.join(repeated)}")
 
     if product.title.count(",") >= MAX_TITLE_COMMAS:
         problems.append("the title is a list of keywords")
@@ -354,7 +360,7 @@ def check_keyword_stuffing(product: Product) -> RuleResult:
         problems.append(f"the title is longer than {MAX_TITLE_LENGTH} characters")
 
     passed: bool = len(problems) == 0
-    return make_result("keyword_stuffing", passed, "Keyword stuffing: " + "; ".join(problems))
+    return make_result("keyword_stuffing", passed, "; ".join(problems))
 
 
 def first_sentence(text: str) -> str:
@@ -378,7 +384,7 @@ def check_clear_opening(product: Product) -> RuleResult:
     for word in CATEGORY_WORDS[key]:
         if re.search(r"\b" + re.escape(word) + r"\b", opening) is not None:
             names_it = True
-    return make_result("clear_opening", names_it, f"The first sentence does not say what the product is (e.g. {CATEGORY_WORDS[key][0]})")
+    return make_result("clear_opening", names_it, f"it should say what the product is, e.g. \"{CATEGORY_WORDS[key][0]}\"")
 
 
 # the one place a rule is declared: its function, its points, and the criterion it scores.
